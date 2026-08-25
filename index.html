@@ -46,16 +46,32 @@ button:hover{opacity:.85}
 button:focus-visible{outline:2px solid var(--beet);outline-offset:2px}
 /* výběr týdne */
 .weekbar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;background:var(--ink);color:#fff;border-radius:var(--r);padding:12px 14px;margin-top:16px}
+.weekbar .wtext{flex:1;line-height:1.25}
 .weekbar .wlabel{font-family:var(--display);font-weight:800;font-size:19px;letter-spacing:-.01em}
-.weekbar .wrange{font-family:var(--mono);font-size:12px;color:#a9bcb2}
+.weekbar .wrange{font-family:var(--mono);font-size:12.5px;color:#a9bcb2;white-space:nowrap}
 .weekbar button{background:transparent;border-color:#3c4f49;color:#fff;padding:8px 13px;font-family:var(--mono);font-size:15px}
-.weekbar .spacer{margin-left:auto}
+
 .weekbar .dnes{font-size:13px;padding:8px 12px}
+/* rozcestník */
+.tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(215px,1fr));gap:14px;margin-top:26px}
+.tile{display:flex;flex-direction:column;align-items:flex-start;gap:4px;text-align:left;
+  background:var(--card);color:var(--ink);border:1px solid var(--line);border-radius:var(--r);
+  padding:22px 20px 20px;font-weight:400;cursor:pointer;transition:border-color .15s,transform .15s}
+.tile:hover{opacity:1;border-color:var(--ink);transform:translateY(-2px)}
+.tile svg{width:40px;height:40px;fill:none;stroke:var(--beet);stroke-width:2.2;
+  stroke-linecap:round;stroke-linejoin:round;margin-bottom:10px}
+.tile:nth-child(2) svg{stroke:var(--herb)} .tile:nth-child(3) svg{stroke:var(--amber)}
+.tname{font-family:var(--display);font-weight:800;font-size:20px;letter-spacing:-.01em;line-height:1.15}
+.tsub{font-size:13.5px;color:var(--muted)}
+.zpet{background:none;border:0;color:var(--muted);font-size:14px;font-weight:400;
+  padding:16px 0 0;text-decoration:underline;cursor:pointer}
+.zpet:hover{color:var(--ink);opacity:1}
+.view[hidden]{display:none}
 /* výzva k vážení */
 .callout{background:var(--ink);color:#fff;border-radius:var(--r);padding:14px 16px;margin-top:14px;display:none}
 .callout.on{display:block}
 .callout h3{font-family:var(--display);font-size:18px;margin:0 0 4px}
-.callout p{margin:0 0 10px;color:#c3d1c8;font-size:14px}
+.callout p{margin:0;color:#c3d1c8;font-size:14px}
 .callout .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
 .callout input{max-width:130px;background:#243430;border-color:#3c4f49;color:#fff}
 .callout button{background:#fff;color:var(--ink);border-color:#fff}
@@ -72,7 +88,10 @@ button:focus-visible{outline:2px solid var(--beet);outline-offset:2px}
 .person .rezim{font-size:12px;color:var(--muted);margin-top:8px;border-top:1px dashed var(--line);padding-top:8px}
 .person .wrow{display:flex;gap:6px;margin-top:10px}
 .person .wrow input{padding:7px 8px;font-size:14px;min-width:0}
-.person .wrow input[id^="tuk-"]{max-width:88px}
+.person .wrow input:disabled{background:#f2f5f2;color:var(--muted)}
+.prepinac{font-family:var(--mono);font-size:11px;letter-spacing:.06em;text-transform:uppercase;
+  font-weight:400;background:transparent;color:var(--muted);border-color:var(--line);white-space:nowrap}
+.prepinac.on{background:var(--ink);color:#fff;border-color:var(--ink)}
 .person .wrow button{padding:7px 11px;font-size:12px}
 .spark{width:100%;height:52px;display:block;margin-top:8px}
 /* editor */
@@ -135,9 +154,6 @@ button:focus-visible{outline:2px solid var(--beet);outline-offset:2px}
 .note{margin-top:10px;font-size:13px;color:var(--warn);border-left:3px solid var(--warn);padding-left:10px}
 .note:empty{display:none}
 footer{margin-top:42px;padding-top:16px;border-top:1px solid var(--line);font-size:13px;color:var(--muted)}
-.jenPepca{display:none}
-body.editor .jenPepca{display:block}
-body.editor .jenPepca.inline{display:flex}
 @media (max-width:560px){
   .slotedit{grid-template-columns:1fr auto}
   .slotedit .sname{grid-column:1/-1}
@@ -155,103 +171,124 @@ body.editor .jenPepca.inline{display:flex}
 <div class="wrap">
 
 <header>
-  <p class="eyebrow">Jídelníček · Pepča, Simča, Joža · 4 000 kroků</p>
-  <h1>Týden pro <em>tři</em>.</h1>
-  <p class="lede">Oběd a večeře se vaří najednou na víc dnů, Joža bere jen oběd. Každý má svoje gramáže podle vlastních čísel.</p>
+  <p class="eyebrow">Jídelníček · Pepča, Simča, Joža</p>
   <div class="weekbar">
     <button id="wprev" title="Předchozí týden">←</button>
-    <div><div class="wlabel" id="wlabel">—</div><div class="wrange" id="wrange"></div></div>
+    <div class="wtext"><span class="wlabel" id="wlabel">—</span> <span class="wrange" id="wrange"></span></div>
     <button id="wnext" title="Další týden">→</button>
-    <span class="spacer"></span>
-    <button id="wtoday" class="dnes">Tento týden</button>
+    <button id="wtoday" class="dnes">dnešní</button>
   </div>
-  <div class="callout" id="callout">
-    <h3>Je čas se zvážit</h3>
-    <p id="calloutText"></p>
-    <div class="row">
-      <input id="calloutKg" type="number" step="0.1" inputmode="decimal" placeholder="kg">
-      <button id="calloutSave">Zapsat</button>
-      <button id="calloutLater" class="later">Až později</button>
-    </div>
-  </div>
+  <div class="callout" id="callout"><p id="calloutText"></p></div>
 </header>
 
-<section>
-  <div class="sec-head"><h2>Lidi a jejich čísla</h2><span class="hint">váha se dá kdykoliv přepsat, cíle se přepočítají</span></div>
-  <div class="people" id="people"></div>
-  <div class="note" id="warn"></div>
-</section>
-
-<section class="jenPepca noprint">
-  <div class="sec-head"><h2>Skládání týdne</h2><span class="hint">vyber den, pak jídlo z nabídky</span></div>
-  <div class="card">
-    <div class="daytabs" id="daytabs"></div>
-    <div id="slotedit"></div>
-    <div class="potnote" id="potnote"></div>
-    <div class="btnrow">
-      <button id="fill">Doplnit prázdná místa</button>
-      <button id="regen" class="ghost">Složit znovu od nuly</button>
-    </div>
+<!-- ROZCESTNÍK -->
+<div class="view" id="view-home">
+  <div class="tiles">
+    <button class="tile" data-jdi="jidelnicek">
+      <svg viewBox="0 0 48 48" aria-hidden="true">
+        <rect x="8" y="6" width="32" height="36" rx="3"/>
+        <line x1="15" y1="16" x2="33" y2="16"/><line x1="15" y1="24" x2="33" y2="24"/><line x1="15" y1="32" x2="27" y2="32"/>
+      </svg>
+      <span class="tname">Jídelníček</span>
+      <span class="tsub">co se ten týden jí a kdy se vaří</span>
+    </button>
+    <button class="tile" data-jdi="nakup">
+      <svg viewBox="0 0 48 48" aria-hidden="true">
+        <path d="M10 14h28l-3 24H13z"/><path d="M18 14V9a6 6 0 0 1 12 0v5"/>
+      </svg>
+      <span class="tname">Nákupní seznam</span>
+      <span class="tsub">všechno na celý týden</span>
+    </button>
+    <button class="tile" data-jdi="uprava">
+      <svg viewBox="0 0 48 48" aria-hidden="true">
+        <path d="M30 10l8 8-20 20-10 2 2-10z"/><line x1="26" y1="14" x2="34" y2="22"/>
+      </svg>
+      <span class="tname">Úprava jídelníčku</span>
+      <span class="tsub">skládání, nabídka jídel, čísla</span>
+    </button>
   </div>
-</section>
+</div>
 
-<section class="jenPepca noprint">
-  <div class="sec-head"><h2>Nabídka jídel</h2><span class="hint">odškrtnuté se nenabídnou automatu ani v rozbalovátku</span></div>
-  <div class="card" id="nabidka"></div>
-</section>
-
-<section>
-  <div class="sec-head"><h2>Týden</h2><span class="hint">gramáže jsou pro každého zvlášť</span></div>
-  <div id="week"></div>
-</section>
-
-<section>
-  <div class="sec-head"><h2>Kdy co uvařit</h2><span class="hint">jedno vaření pokryje oběd i večeři na víc dnů · polévka jen o víkendu</span></div>
-  <div class="card" id="cook"></div>
-</section>
-
-<section>
-  <div class="sec-head"><h2>Nákupní seznam</h2><span class="hint">na celý týden, syrové váhy</span></div>
-  <div class="card"><div class="cols" id="shop"></div></div>
-</section>
-
-<section class="noprint">
-  <div class="sec-head"><h2>Kalendář a tisk</h2><span class="hint">ranní upozornění pro Simču</span></div>
-  <div class="card">
-    <p style="margin:0 0 4px;font-size:14px;color:var(--muted)">Stáhne sedm ranních událostí na 7:00 — co ten den připravit za svačiny sobě i Pepčovi a co bude druhý den k obědu. Simča si soubor jednou naimportuje do kalendáře a má to bez otvírání appky.</p>
-    <div class="btnrow">
-      <button id="ics">Stáhnout týden do kalendáře</button>
-      <button id="print" class="ghost">Vytisknout / uložit PDF</button>
+<!-- JÍDELNÍČEK -->
+<div class="view" id="view-jidelnicek" hidden>
+  <button class="zpet" data-zpet>← Zpět na rozcestník</button>
+  <section>
+    <div class="sec-head"><h2>Týden</h2><span class="hint">gramáže jsou pro každého zvlášť</span></div>
+    <div id="week"></div>
+  </section>
+  <section>
+    <div class="sec-head"><h2>Kdy co uvařit</h2><span class="hint">jedno vaření pokryje oběd i večeři na víc dnů · polévka jen o víkendu</span></div>
+    <div class="card" id="cook"></div>
+  </section>
+  <section class="noprint">
+    <div class="sec-head"><h2>Kalendář a tisk</h2></div>
+    <div class="card">
+      <p style="margin:0 0 4px;font-size:14px;color:var(--muted)">Sedm ranních událostí na 7:00 — co ten den připravit za svačiny a co bude druhý den k obědu. Stačí naimportovat do kalendáře.</p>
+      <div class="btnrow">
+        <button id="ics">Stáhnout týden do kalendáře</button>
+        <button id="print" class="ghost">Vytisknout / uložit PDF</button>
+      </div>
+      <div class="status" id="icsStatus"></div>
     </div>
-    <div class="status" id="icsStatus"></div>
-  </div>
-</section>
+  </section>
+</div>
 
-<section class="noprint">
-  <div class="sec-head"><h2>Nastavení</h2></div>
-  <div class="card">
-    <div class="form-grid">
-      <div><label for="role">Kdo tuhle appku má</label><select id="role">
-        <option value="pepca">Pepča — skládá jídelníček</option>
-        <option value="simca">Simča — jen kouká</option>
-      </select></div>
-      <div><label for="ghOwner">Uživatel na GitHubu</label><input id="ghOwner" type="text" placeholder="majitel datového repa" autocomplete="off"></div>
-      <div><label for="ghRepo">Datový repozitář</label><input id="ghRepo" type="text" value="jidelnicek-data" autocomplete="off"></div>
-      <div><label for="ghToken">Token</label><input id="ghToken" type="password" placeholder="github_pat_…" autocomplete="off"></div>
+<!-- NÁKUP -->
+<div class="view" id="view-nakup" hidden>
+  <button class="zpet" data-zpet>← Zpět na rozcestník</button>
+  <section>
+    <div class="sec-head"><h2>Nákupní seznam</h2><span class="hint">na celý týden, syrové váhy</span></div>
+    <div class="card"><div class="cols" id="shop"></div></div>
+    <div class="btnrow noprint"><button id="printShop" class="ghost">Vytisknout seznam</button></div>
+  </section>
+</div>
+
+<!-- ÚPRAVA -->
+<div class="view" id="view-uprava" hidden>
+  <button class="zpet" data-zpet>← Zpět na rozcestník</button>
+  <section>
+    <div class="sec-head"><h2>Skládání týdne</h2><span class="hint">vyber den, pak jídlo z nabídky</span></div>
+    <div class="card">
+      <div class="daytabs" id="daytabs"></div>
+      <div id="slotedit"></div>
+      <div class="potnote" id="potnote"></div>
+      <div class="btnrow">
+        <button id="fill">Doplnit prázdná místa</button>
+        <button id="regen" class="ghost">Složit znovu od nuly</button>
+      </div>
     </div>
-    <div class="btnrow">
-      <button id="push" class="jenPepca">Sdílet</button>
-      <button id="pull" class="ghost">Načíst sdílené</button>
-      <button id="export" class="ghost">Stáhnout zálohu</button>
-      <button id="importBtn" class="ghost">Načíst zálohu</button>
-      <input id="importFile" type="file" accept="application/json" style="display:none">
+  </section>
+  <section>
+    <div class="sec-head"><h2>Nabídka jídel</h2><span class="hint">odškrtnuté se nenabídnou automatu ani v rozbalovátku</span></div>
+    <div class="card" id="nabidka"></div>
+  </section>
+  <section>
+    <div class="sec-head"><h2>Lidi a jejich čísla</h2><span class="hint">váha, tuk a případně vlastní denní příjem</span></div>
+    <div class="people" id="people"></div>
+    <div class="note" id="warn"></div>
+  </section>
+  <section>
+    <div class="sec-head"><h2>Sdílení a zálohy</h2></div>
+    <div class="card">
+      <div class="form-grid">
+        <div><label for="ghOwner">Uživatel na GitHubu</label><input id="ghOwner" type="text" placeholder="majitel datového repa" autocomplete="off"></div>
+        <div><label for="ghRepo">Datový repozitář</label><input id="ghRepo" type="text" value="jidelnicek-data" autocomplete="off"></div>
+        <div><label for="ghToken">Token</label><input id="ghToken" type="password" placeholder="github_pat_…" autocomplete="off"></div>
+      </div>
+      <div class="btnrow">
+        <button id="push">Sdílet</button>
+        <button id="pull" class="ghost">Načíst sdílené</button>
+        <button id="export" class="ghost">Stáhnout zálohu</button>
+        <button id="importBtn" class="ghost">Načíst zálohu</button>
+        <input id="importFile" type="file" accept="application/json" style="display:none">
+      </div>
+      <div class="status" id="syncStatus"></div>
     </div>
-    <div class="status" id="syncStatus"></div>
-  </div>
-</section>
+  </section>
+</div>
 
 <footer>
-  Hodnoty surovin jsou průměry běžných značek, ne opsané etikety. Výdej počítá Mifflin–St Jeor plus energii za 4 000 kroků. Je to plán, ne lékařská rada — u Joži platí dvojnásob.
+  Hodnoty surovin jsou průměry běžných značek, ne opsané etikety. Klidový výdej počítá Katch–McArdle z aktivní tělesné hmoty. Je to plán, ne lékařská rada — u Joži platí dvojnásob.
 </footer>
 
 </div>
@@ -391,17 +428,19 @@ const REC=[
 
 /* ============ lidi ============ */
 const LIDE=[
-  {id:"pepca",jmeno:"Pepča",role:"skládá jídelníček",sex:"m",cm:186,kg:106,vek:25,tuk:30,rezim:"deficit",cely:true},
-  {id:"simca",jmeno:"Simča",role:"jí celý den",    sex:"z",cm:167,kg:77, vek:50,tuk:30,rezim:"deficit",cely:true},
-  {id:"joza", jmeno:"Joža", role:"jen oběd",       sex:"m",cm:176,kg:100,vek:86,tuk:30,rezim:"udrzovaci",cely:false}
+  /* kotva = tvoje zadané čísla: při téhle váze tolik kalorií.
+     Od nich se odvíjí přepočet, když se váha změní. */
+  {id:"pepca",jmeno:"Pepča",nar:"2001-08-02",sex:"m",cm:186,kg:107,kotva:{kg:107,kcal:2323},cely:true},
+  {id:"simca",jmeno:"Simča",nar:"1976-02-14",sex:"z",cm:167,kg:77, kotva:{kg:77, kcal:1793},cely:true},
+  {id:"joza", jmeno:"Joža", nar:"1941-02-14",sex:"m",cm:176,kg:103,cely:false}
 ];
-const KROKY=4000;
+const osoba=id=>LIDE.find(o=>o.id===id);
 const DAYS=["Pondělí","Úterý","Středa","Čtvrtek","Pátek","Sobota","Neděle"];
 const DAYSHORT=["Po","Út","St","Čt","Pá","So","Ne"];
 const PAIRS=[[0,1],[2,3],[4],[5,6]];
 /* podíly dne u toho, kdo jí celý den */
 const SHARES={snidane:0.20,svacina:0.08,obed:0.27,odpol:0.08,vecere:0.27,druha:0.10};
-const JOZA_PODIL=0.70;        /* Joža dostává 70 % Pepčovy porce */
+const JOZA_PODIL=0.80;        /* Jožův den = 80 % Pepčova, plánuje se z něj jen oběd */
 const REFERENCNI="pepca";     /* podle koho se ta porce měří */
 const POLEVKA_PODIL=0.08;   /* polévka k obědu */
 const jeVikend=pi=>PAIRS[pi].some(d=>d>=5);   /* polévka se vaří jen na sobotu a neděli */                      /* Jožovi plánujeme jen oběd */
@@ -481,38 +520,44 @@ function nabidka(slot){
 /* ============ cíle ============ */
 function vahaOsoby(o){const db=DB.read();return db.kg[o.id]||o.kg}
 function vlastniKcal(o){const db=DB.read();return (db.kcalRucne||{})[o.id]||null}
-function tukOsoby(o){const db=DB.read();const t=(db.tuk||{})[o.id];return t||o.tuk||null}
+function vekOsoby(o){
+  const d=new Date(o.nar), t=new Date();
+  let v=t.getFullYear()-d.getFullYear();
+  const m=t.getMonth()-d.getMonth();
+  if(m<0||(m===0&&t.getDate()<d.getDate()))v--;
+  return v;
+}
+function bmrOsoby(o,kg){return 10*kg+6.25*o.cm-5*vekOsoby(o)+(o.sex==="m"?5:-161)}
+/* z kotvy se odvodí osobní koeficient — u jiné váhy pak drží stejný poměr */
+function koeficient(o){return o.kotva?o.kotva.kcal/bmrOsoby(o,o.kotva.kg):null}
+function rucniRezim(o){return (DB.read().rucne||{})[o.id]===true}
 function cile(o){
-  const kg=vahaOsoby(o);
-  const tuk=tukOsoby(o);
-  const lbm=tuk?kg*(1-tuk/100):null;                       /* aktivní tělesná hmota */
-  const mifflin=10*kg+6.25*o.cm-5*o.vek+(o.sex==="m"?5:-161);
-  /* Katch–McArdle počítá z aktivní hmoty, a proto je při známém tuku přesnější */
-  const katch=lbm?370+21.6*lbm:null;
-  const bmr=katch||mifflin;
-  /* násobek aktivity podle kroků: 1,2 při 4 000 (sedavý den) až 1,55 při 10 000 */
-  const pal=Math.min(1.9,1.2+Math.max(0,KROKY-4000)*0.0000583);
-  const vydej=bmr*pal;
-  let kcal,pozn="";
-  if(o.rezim==="udrzovaci"){
-    kcal=Math.round(vydej/10)*10;
-    pozn="tolik, kolik spálí — bez ubírání";
+  const kg=vahaOsoby(o), vek=vekOsoby(o);
+  let kcal,pozn="",auto=!rucniRezim(o);
+
+  if(!o.cely){
+    /* Joža nemá vlastní rovnici — jede na podílu Pepčova dne */
+    const vzor=cile(osoba(REFERENCNI));
+    kcal=Math.round(JOZA_PODIL*vzor.kcal);
+    auto=true;
+    pozn=`${Math.round(JOZA_PODIL*100)} % toho, co má ${osoba(REFERENCNI).jmeno}`;
+  }else if(!auto&&vlastniKcal(o)){
+    kcal=vlastniKcal(o);
+    pozn="zadáno ručně";
   }else{
-    kcal=Math.round(vydej*0.82/10)*10;
-    /* pod klidový metabolismus se nechodí — tělo pak šetří místo aby ubíralo */
-    const dno=Math.max(Math.round(bmr/10)*10, o.sex==="m"?1600:1350);
-    if(kcal<dno){kcal=dno;pozn=`níž už ne — tolik spálí i vleže (${Math.round((vydej-kcal)/10)*10} kcal pod výdejem)`}
-    else pozn=`o ${Math.round((vydej-kcal)/10)*10} kcal míň, než spálí`;
+    kcal=Math.round(koeficient(o)*bmrOsoby(o,kg));
+    auto=true;
+    pozn=kg===o.kotva.kg
+      ? `základ: ${o.kotva.kg} kg = ${cz(o.kotva.kcal)} kcal`
+      : `dopočítáno z váhy — základ ${o.kotva.kg} kg = ${cz(o.kotva.kcal)} kcal`;
   }
-  const rucne=vlastniKcal(o);
-  if(rucne){kcal=rucne;pozn="vlastní zadání, ne výpočet"}
-  /* bílkoviny na kilo aktivní hmoty — svalu je jedno, kolik kolem sebe nese tuku.
-     Bez známého tuku se bere referenční váha (nejvýš ta pro BMI 25). */
-  const zaklad=lbm||Math.min(kg,25*(o.cm/100)*(o.cm/100));
-  const p=Math.round((o.rezim==="udrzovaci"?1.8:2.0)*zaklad);
-  const f=Math.max(Math.round(0.8*zaklad),Math.round(kcal*0.28/9));
+
+  /* bílkoviny z referenční váhy (nejvýš ta odpovídající BMI 25) */
+  const ref=Math.min(kg,25*(o.cm/100)*(o.cm/100));
+  const p=Math.round(1.8*ref);
+  const f=Math.max(Math.round(0.7*ref),Math.round(kcal*0.28/9));
   const c=Math.round((kcal-p*4-f*9)/4);
-  return{kg,tuk,lbm:lbm?Math.round(lbm):null,mifflin:Math.round(mifflin),vydej:Math.round(vydej),kcal,p,c,f,pozn,bmr:Math.round(bmr),pal:pal.toFixed(2)};
+  return{kg,vek,kcal,p,c,f,pozn,auto,naKilo:o.kotva?Math.round(koeficient(o)*10):null};
 }
 
 /* ============ plán týdne ============ */
@@ -775,8 +820,6 @@ const soupis=a=>Object.keys(a).map(k=>ING[k].n+" "+fmtG(k,a[k])).join(" · ");
 const cz=n=>n.toLocaleString("cs");
 
 let TYDEN, VYPOCET, AKTDEN=0;
-const jaJsem=()=>DB.read().role||"pepca";
-const osoba=id=>LIDE.find(o=>o.id===id);
 
 /* ============ lidi ============ */
 function renderPeople(){
@@ -784,49 +827,45 @@ function renderPeople(){
   document.getElementById("people").innerHTML=LIDE.map(o=>{
     const t=VYPOCET.tg[o.id];
     const h=(db.vahy[o.id]||[]);
-    const obedJoza=Math.round(JOZA_PODIL*VYPOCET.tg[REFERENCNI].kcal*SHARES.obed/10)*10;
-    const hlavni=o.cely?t.kcal:obedJoza;
+    const hlavni=o.cely?t.kcal:Math.round(t.kcal*SHARES.obed/10)*10;
     const popisek=o.cely?"kcal na den":"kcal na oběd";
     const makra=o.cely
       ? `${t.p} g bílkovin · ${t.c} g sacharidů · ${t.f} g tuků`
-      : `${Math.round(JOZA_PODIL*100)} % porce, kterou má ${osoba(REFERENCNI).jmeno} — zbytek dne neplánujeme`;
+      : `celý den by mu vyšel na ${cz(t.kcal)} kcal — zapisujeme z něj jen oběd`;
     return `<div class="person ${o.id}">
-      <h3>${o.jmeno}</h3><div class="kdo">${o.role} · ${o.vek} let · ${o.cm} cm</div>
+      <h3>${o.jmeno}</h3><div class="kdo">${t.vek} let · ${o.cm} cm${o.cely?"":" · plánuje se jen oběd"}</div>
       <div class="big">${cz(hlavni)}<small> ${popisek}</small></div>
       <div class="macro">${makra}</div>
-      <div class="rezim">${t.lbm?`${t.tuk} % tuku → <b>${t.lbm} kg</b> aktivní hmoty. `:""}Výdej ${cz(t.vydej)} kcal — ${t.pozn}.${realita(o,t)}${t.lbm&&Math.abs(t.bmr-t.mifflin)>120?` <br><span style="opacity:.75">Bez tuku by rovnice odhadla klidový výdej na ${cz(t.mifflin)} místo ${cz(t.bmr)}.</span>`:""}</div>
+      <div class="rezim">${t.pozn}.${t.auto&&o.kotva&&t.kg!==o.kotva.kg?` Každé kilo posune příjem o ${t.naKilo} kcal.`:""}${realita(o,t)}</div>
       <div class="wrow">
         <input id="kg-${o.id}" type="number" step="0.1" inputmode="decimal" value="${t.kg}" aria-label="Váha ${o.jmeno} v kg" placeholder="kg">
-        <input id="tuk-${o.id}" type="number" step="1" inputmode="numeric" value="${t.tuk||""}" aria-label="Tělesný tuk ${o.jmeno} v procentech" placeholder="% tuku">
-        <button data-kg="${o.id}">Uložit</button>
+        <button data-kg="${o.id}">Uložit váhu</button>
       </div>
-      <div class="wrow">
-        <input id="kcal-${o.id}" type="number" step="10" inputmode="numeric" value="${vlastniKcal(o)||""}" placeholder="spočítat samo" aria-label="Vlastní denní příjem ${o.jmeno}">
-        <button data-kcal="${o.id}">Uložit kcal</button>
-      </div>
+      ${o.cely?`<div class="wrow">
+        <input id="kcal-${o.id}" type="number" step="10" inputmode="numeric" value="${t.auto?t.kcal:(vlastniKcal(o)||t.kcal)}" ${t.auto?"disabled":""} aria-label="Denní příjem ${o.jmeno}">
+        <button class="prepinac ${t.auto?"on":""}" data-auto="${o.id}">${t.auto?"automaticky":"ručně"}</button>
+      </div>`:""}
       ${h.length>1?`<svg class="spark" id="spark-${o.id}" viewBox="0 0 300 60" preserveAspectRatio="none"></svg>`:""}
     </div>`;
   }).join("");
-  document.querySelectorAll("[data-kcal]").forEach(b=>b.onclick=()=>{
-    const id=b.dataset.kcal, v=document.getElementById("kcal-"+id).value.trim();
-    const db=DB.read();db.kcalRucne=db.kcalRucne||{};
-    if(!v)delete db.kcalRucne[id];
-    else{
+  document.querySelectorAll("[data-auto]").forEach(b=>b.onclick=()=>{
+    const id=b.dataset.auto, db=DB.read();
+    db.rucne=db.rucne||{};
+    if(db.rucne[id]){                       /* zpátky na automatický přepočet */
+      delete db.rucne[id];delete (db.kcalRucne||{})[id];
+      DB.save();prekresli();
+      setStatus(osoba(id).jmeno+": příjem se zase dopočítává z váhy.");
+    }else{                                  /* přepnout na ruční zadání */
+      const v=document.getElementById("kcal-"+id).value.trim();
       const n=Math.round(parseFloat(v.replace(",","."))/10)*10;
       if(!(n>=1000&&n<=5000)){setStatus("Denní příjem zadej mezi 1000 a 5000 kcal.");return}
-      db.kcalRucne[id]=n;
+      db.rucne[id]=true;db.kcalRucne=db.kcalRucne||{};db.kcalRucne[id]=n;
+      DB.save();prekresli();
+      setStatus(osoba(id).jmeno+": příjem nastaven ručně na "+n+" kcal.");
     }
-    DB.save();prekresli();
-    setStatus(osoba(id).jmeno+(v?": příjem nastaven ručně na "+db.kcalRucne[id]+" kcal.":": zpátky na spočítanou hodnotu."));
   });
   document.querySelectorAll("[data-kg]").forEach(b=>b.onclick=()=>{
     const id=b.dataset.kg;
-    const tukPole=document.getElementById("tuk-"+id).value.trim();
-    if(tukPole){
-      const t=parseFloat(tukPole.replace(",","."));
-      if(!(t>=3&&t<=60)){setStatus("Tělesný tuk zadej v procentech, mezi 3 a 60.");return}
-      const db=DB.read();db.tuk=db.tuk||{};db.tuk[id]=Math.round(t);DB.save();
-    }
     const kg=parseFloat(String(document.getElementById("kg-"+id).value).replace(",","."));
     ulozVahu(id,kg);
   });
@@ -1067,26 +1106,26 @@ const setStatus=t=>{const e=document.getElementById("syncStatus");e.textContent=
 
 /* ============ připomínka vážení ============ */
 function checkReminder(){
-  const db=DB.read(), ja=jaJsem(), h=db.vahy[ja]||[];
-  const co=document.getElementById("callout");
-  if(db.snooze===dnes()){co.classList.remove("on");return}
-  let due=false,text="";
-  if(!h.length){due=true;text="Zapiš první váhu, ať má appka z čeho počítat."}
-  else{
+  const db=DB.read(), co=document.getElementById("callout");
+  const stare=LIDE.map(o=>{
+    const h=db.vahy[o.id]||[];
+    if(!h.length)return o.jmeno+" (zatím nikdy)";
     const dnu=rozdilDnu(h[h.length-1].d,dnes());
-    if(dnu>=7){due=true;text=`Poslední záznam je ${dnu} dní starý. Ráno, nalačno, na stejné váze.`}
-  }
-  co.classList.toggle("on",due);
-  document.getElementById("calloutText").textContent=text;
+    return dnu>=7?`${o.jmeno} (${dnu} dní)`:null;
+  }).filter(Boolean);
+  co.classList.toggle("on",stare.length>0);
+  document.getElementById("calloutText").textContent=stare.length
+    ? "Čas na vážení: "+stare.join(", ")+". Zapisuje se v Úpravě jídelníčku."
+    : "";
 }
 
 /* ============ překreslení ============ */
 function prekresli(){
   VYPOCET=spocitej(TYDEN);
   document.getElementById("wlabel").textContent=cisloTydne(TYDEN)+". týden";
-  document.getElementById("wrange").textContent=dmt(TYDEN)+" – "+dmt(posun(TYDEN,6))+" "+new Date(TYDEN).getFullYear();
+  document.getElementById("wrange").textContent="("+dmt(TYDEN)+" – "+dmt(posun(TYDEN,6))+")";
   renderPeople();
-  if(jaJsem()==="pepca"){renderEditor();renderNabidka()}
+  renderEditor();renderNabidka();
   renderWeek();renderCook();renderShop();checkReminder();
 }
 
@@ -1134,7 +1173,6 @@ const GH={
 async function syncPush(){
   const c=GH.cfg();
   if(!c.owner||!c.token){setStatus("Vyplň uživatele a token.");return}
-  if(jaJsem()!=="pepca"){setStatus("Sdílet může jen Pepča.");return}
   setStatus("Odesílám…");
   for(let pokus=0;pokus<2;pokus++){
     try{
@@ -1170,12 +1208,19 @@ async function syncPull(potichu){
   }
 }
 
-/* ============ start ============ */
-function nastavRoli(){
-  const r=jaJsem();
-  document.body.classList.toggle("editor",r==="pepca");
-  document.getElementById("role").value=r;
+/* ============ navigace ============ */
+const POHLEDY=["home","jidelnicek","nakup","uprava"];
+function jdi(kam){
+  POHLEDY.forEach(v=>{
+    const el=document.getElementById("view-"+v);
+    if(el)el.hidden=(v!==kam);
+  });
+  window.scrollTo({top:0,behavior:"instant"});
 }
+document.querySelectorAll("[data-jdi]").forEach(b=>b.onclick=()=>jdi(b.dataset.jdi));
+document.querySelectorAll("[data-zpet]").forEach(b=>b.onclick=()=>jdi("home"));
+
+/* ============ start ============ */
 TYDEN=pondeli(dnes());
 
 document.getElementById("wprev").onclick=()=>{TYDEN=posun(TYDEN,-7);AKTDEN=0;prekresli()};
@@ -1185,16 +1230,7 @@ document.getElementById("fill").onclick=()=>{doplnPlan(TYDEN,false);prekresli()}
 document.getElementById("regen").onclick=()=>{doplnPlan(TYDEN,true);prekresli()};
 document.getElementById("ics").onclick=makeICS;
 document.getElementById("print").onclick=()=>window.print();
-document.getElementById("role").onchange=e=>{
-  const db=DB.read();db.role=e.target.value;DB.save();nastavRoli();prekresli();
-};
-document.getElementById("calloutSave").onclick=()=>{
-  const el=document.getElementById("calloutKg");
-  ulozVahu(jaJsem(),parseFloat(String(el.value).replace(",",".")));el.value="";
-};
-document.getElementById("calloutLater").onclick=()=>{
-  const db=DB.read();db.snooze=dnes();DB.save();document.getElementById("callout").classList.remove("on");
-};
+document.getElementById("printShop").onclick=()=>window.print();
 document.getElementById("push").onclick=syncPush;
 document.getElementById("pull").onclick=()=>syncPull(false);
 ["ghOwner","ghRepo","ghToken"].forEach(id=>document.getElementById(id).onchange=()=>GH.save());
@@ -1222,11 +1258,11 @@ function startNastaveni(){
   document.getElementById("ghOwner").value=c.owner||"";
   document.getElementById("ghRepo").value=c.repo||"jidelnicek-data";
   document.getElementById("ghToken").value=c.token||"";
-  nastavRoli();
 }
 startNastaveni();
 if(!Object.keys(DB.read().plany).length)doplnPlan(TYDEN,false);
 prekresli();
+jdi("home");
 document.addEventListener("visibilitychange",()=>{if(!document.hidden)checkReminder()});
 const c0=GH.cfg();
 if(c0.owner&&c0.token)syncPull(true);
