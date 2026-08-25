@@ -179,7 +179,7 @@ footer{margin-top:46px;padding-top:18px;border-top:1px solid var(--line);font-si
     <div class="btnrow noprint">
       <button id="notif" class="ghost">Povolit upozornění</button>
       <button id="ics" class="ghost">Připomínka do kalendáře</button>
-      <button id="export" class="ghost">Záloha na Disk</button>
+      <button id="export" class="ghost">Stáhnout zálohu</button>
       <button id="importBtn" class="ghost">Načíst zálohu</button>
       <input id="importFile" type="file" accept="application/json" style="display:none">
     </div>
@@ -188,28 +188,13 @@ footer{margin-top:46px;padding-top:18px;border-top:1px solid var(--line);font-si
 </section>
 
 <section class="noprint">
-  <div class="sec-head"><h2>Sdílení</h2><span class="hint">jídelníček je společný, váha zůstává tvoje</span></div>
-  <div class="card">
-    <div class="form-grid">
-      <div><label for="syncUrl">Adresa skriptu</label><input id="syncUrl" type="url" placeholder="https://script.google.com/macros/s/.../exec"></div>
-      <div><label for="syncToken">Token</label><input id="syncToken" type="text" placeholder="dlouhý náhodný řetězec"></div>
-      <div><label for="syncProfile">Profil</label><input id="syncProfile" type="text" placeholder="pepa"></div>
-    </div>
-    <div class="btnrow">
-      <button id="syncBtn">Synchronizovat</button>
-      <button id="syncSave" class="ghost">Uložit připojení</button>
-    </div>
-    <div class="status" id="syncStatus"></div>
-  </div>
-</section>
-
-<section class="noprint">
   <div class="sec-head"><h2>Sdílení</h2><span class="hint">jeden týden pro oba, váha zvlášť</span></div>
   <div class="card">
     <div class="form-grid">
-      <div><label for="syncUrl">Adresa skriptu</label><input id="syncUrl" type="url" placeholder="https://script.google.com/macros/s/…/exec"></div>
-      <div><label for="syncToken">Heslo</label><input id="syncToken" type="text" placeholder="stejné na obou telefonech"></div>
-      <div><label for="syncWho">Kdo jsi</label><input id="syncWho" type="text" placeholder="třeba Pepa"></div>
+      <div><label for="ghOwner">Uživatel na GitHubu</label><input id="ghOwner" type="text" placeholder="ten, komu patří datové repo" autocomplete="off"></div>
+      <div><label for="ghRepo">Datový repozitář</label><input id="ghRepo" type="text" value="jidelnicek-data" autocomplete="off"></div>
+      <div><label for="ghToken">Token</label><input id="ghToken" type="password" placeholder="github_pat_…" autocomplete="off"></div>
+      <div><label for="ghWho">Kdo jsi</label><input id="ghWho" type="text" placeholder="třeba Pepa" autocomplete="off"></div>
     </div>
     <div class="btnrow">
       <button id="push">Sdílet tenhle týden</button>
@@ -279,7 +264,7 @@ footer{margin-top:46px;padding-top:18px;border-top:1px solid var(--line);font-si
 </section>
 
 <footer>
-  Hodnoty surovin jsou průměry běžných značek, ne opsané etikety — u brandovaných věcí se můžou lišit o pár procent. Data zůstávají v telefonu; zálohu na Disk si musíš uložit ručně. Je to plán, ne lékařská rada.
+  Hodnoty surovin jsou průměry běžných značek, ne opsané etikety — u brandovaných věcí se můžou lišit o pár procent. Data zůstávají v telefonu, sdílení je proti privátnímu repozitáři na GitHubu. Je to plán, ne lékařská rada.
 </footer>
 
 </div>
@@ -662,11 +647,6 @@ function restore(){
     if(s.train)s.train.forEach((t,d)=>{const e=document.getElementById("tr"+d);if(e)e.checked=t});
   }
   if(db.every)document.getElementById("wevery").value=db.every;
-  if(db.sync){
-    document.getElementById("syncUrl").value=db.sync.url||"";
-    document.getElementById("syncToken").value=db.sync.token||"";
-    document.getElementById("syncProfile").value=db.sync.profile||"";
-  }
   return db.seed;
 }
 function toggleMode(){
@@ -720,78 +700,64 @@ function makeICS(){
   setStatus("Soubor otevři a přidej do Google kalendáře — připomínka pak chodí i když appku nespustíš.");
 }
 
-/* ============ synchronizace přes Apps Script ============ */
-function touchPlan(){const db=DB.read();db.planT=Date.now();DB.save()}
-function readSync(){
-  return{
-    url:document.getElementById("syncUrl").value.trim(),
-    token:document.getElementById("syncToken").value.trim(),
-    profile:(document.getElementById("syncProfile").value.trim()||"ja")
-  };
-}
-function saveSync(){
-  const db=DB.read();db.sync=readSync();DB.save();
-  syncStatus(db.sync.url?"Připojení uloženo. Teď dej Synchronizovat.":"Adresa skriptu chybí.");
-}
-function syncStatus(t){document.getElementById("syncStatus").textContent=t}
-async function api(action,key,value){
-  const c=DB.read().sync||{};
-  if(!c.url||!c.token)throw new Error("Nejdřív vyplň adresu skriptu a token.");
-  const r=await fetch(c.url,{method:"POST",redirect:"follow",
-    body:JSON.stringify({token:c.token,action,key,value})});
-  const j=await r.json();
-  if(!j.ok)throw new Error(j.error||"Skript vrátil chybu.");
-  return j;
-}
-function mergeWeights(local,remote){
-  const map={};
-  (remote||[]).forEach(r=>map[r.d]=r.kg);
-  (local||[]).forEach(r=>map[r.d]=r.kg);   // vlastní zápis má přednost
-  return Object.keys(map).sort().map(d=>({d,kg:map[d]}));
-}
-async function syncNow(){
-  const db=DB.read();
-  if(!db.sync||!db.sync.url){syncStatus("Nejdřív vyplň adresu skriptu a token.");return}
-  syncStatus("Synchronizuju…");
-  try{
-    const res=await api("get");
-    const remote=res.data||{};
-    const wkey="vaha:"+db.sync.profile;
-    let msg=[];
-
-    // váha — sloučit podle data, vlastní zápis vyhrává
-    const rw=remote[wkey]&&remote[wkey].v&&remote[wkey].v.weights;
-    const merged=mergeWeights(db.weights,rw);
-    if(JSON.stringify(merged)!==JSON.stringify(db.weights)){db.weights=merged;DB.save()}
-    await api("set",wkey,{weights:db.weights});
-    msg.push(db.weights.length+" vážení zazálohováno");
-
-    // jídelníček — vyhrává novější
-    const rp=remote.plan, localT=db.planT||0;
-    if(rp&&rp.t>localT&&rp.v&&rp.v.settings){
-      db.settings=rp.v.settings;db.seed=rp.v.seed;db.planT=rp.t;DB.save();
-      restore();toggleMode();go(db.seed||1);
-      msg.push("stažen novější jídelníček");
-    }else{
-      await api("set","plan",{settings:db.settings,seed:db.seed});
-      db.planT=Date.now();DB.save();
-      msg.push("jídelníček odeslán");
-    }
-    renderWeight();
-    syncStatus("Hotovo v "+new Date().toLocaleTimeString("cs")+" — "+msg.join(", ")+".");
-  }catch(e){
-    syncStatus("Nepovedlo se: "+e.message+" (bez signálu appka jede dál, data se pošlou příště)");
-  }
-}
-
-/* ============ sdílení ============ */
+/* ============ sdílení přes GitHub ============ */
 const val=id=>document.getElementById(id).value.trim();
-function syncCfg(){return DB.read().sync||{}}
-function saveSyncCfg(){
-  const db=DB.read();
-  db.sync={url:val("syncUrl"),token:val("syncToken"),who:val("syncWho")};
-  DB.save();
+
+function b64encode(str){
+  const b=new TextEncoder().encode(str);
+  let out="";const CH=0x8000;
+  for(let i=0;i<b.length;i+=CH)out+=String.fromCharCode.apply(null,b.subarray(i,i+CH));
+  return btoa(out);
 }
+function b64decode(s){
+  const bin=atob(String(s).replace(/\s/g,""));
+  const b=new Uint8Array(bin.length);
+  for(let i=0;i<bin.length;i++)b[i]=bin.charCodeAt(i);
+  return new TextDecoder().decode(b);
+}
+function chybaText(status){
+  if(status===401)return "Token neplatí nebo vypršel — vygeneruj na GitHubu nový.";
+  if(status===403)return "Token nemá právo zapisovat do toho repozitáře.";
+  if(status===404)return "Repozitář nenalezen. Zkontroluj jméno uživatele i repozitáře a že token vidí právě tenhle repozitář.";
+  if(status===409)return "Někdo zapisoval ve stejnou chvíli.";
+  return "GitHub odpověděl chybou "+status+".";
+}
+function ghChyba(status){const e=new Error(chybaText(status));e.status=status;return e}
+
+const GH={
+  cfg(){return DB.read().gh||{}},
+  save(){
+    const db=DB.read();
+    db.gh={owner:val("ghOwner"),repo:val("ghRepo")||"jidelnicek-data",token:val("ghToken"),who:val("ghWho")};
+    DB.save();
+  },
+  hlavicky(c){return{Authorization:"Bearer "+c.token,Accept:"application/vnd.github+json"}},
+  url(c){return `https://api.github.com/repos/${c.owner}/${c.repo}/contents/data.json`},
+  async nacti(c){
+    const r=await fetch(GH.url(c)+"?t="+Date.now(),{headers:GH.hlavicky(c),cache:"no-store"});
+    if(r.status===404)return{data:null,sha:null};
+    if(!r.ok)throw ghChyba(r.status);
+    const j=await r.json();
+    let data=null;
+    try{data=JSON.parse(b64decode(j.content))}catch(e){data=null}
+    return{data,sha:j.sha};
+  },
+  async zapis(c,data,sha){
+    const body={
+      message:"jídelníček — "+(c.who||"?")+" "+new Date().toLocaleString("cs"),
+      content:b64encode(JSON.stringify(data,null,1))
+    };
+    if(sha)body.sha=sha;
+    const r=await fetch(GH.url(c),{
+      method:"PUT",
+      headers:Object.assign({"Content-Type":"application/json"},GH.hlavicky(c)),
+      body:JSON.stringify(body)
+    });
+    if(!r.ok)throw ghChyba(r.status);
+    return r.json();
+  }
+};
+
 function setSync(t){document.getElementById("syncStatus").textContent=t}
 function serializeWeek(){
   const W=STATE.w;
@@ -810,41 +776,64 @@ function deserializeWeek(p){
       meals:d.meals.map(m=>({slot:m.slot,rec:byId(m.rec),a:m.a,dish:m.dish,rescue:m.rescue}))}))
   };
 }
-async function syncPush(){
-  const c=syncCfg();
-  if(!c.url||!c.token){setSync("Vyplň adresu skriptu a heslo.");return}
-  setSync("Odesílám…");
-  try{
-    const r=await fetch(c.url,{method:"POST",body:JSON.stringify({
-      token:c.token,kdo:c.who||"?",plan:serializeWeek(),vahy:DB.read().weights
-    })});
-    const j=await r.json();
-    setSync(j.ok?"Týden je nahoře. Druhý si ho stáhne tlačítkem vedle.":"Skript odpověděl: "+j.chyba);
-  }catch(e){setSync("Nepovedlo se spojit se skriptem — zkontroluj adresu a připojení.")}
+function mojeVahyVen(kdo){
+  return DB.read().weights.map(w=>({d:w.d,kdo,kg:w.kg}));
 }
+function vahyDovnitr(vahy,kdo){
+  const db=DB.read();let pridano=0;
+  (vahy||[]).filter(v=>v.kdo===kdo).forEach(v=>{
+    if(!db.weights.find(x=>x.d===v.d)){db.weights.push({d:v.d,kg:Number(v.kg)});pridano++}
+  });
+  if(pridano){db.weights.sort((a,b)=>a.d<b.d?-1:1);DB.save()}
+  return pridano;
+}
+
+async function syncPush(){
+  const c=GH.cfg();
+  if(!c.owner||!c.token){setSync("Vyplň uživatele a token.");return}
+  const kdo=c.who||"?";
+  setSync("Odesílám…");
+  for(let pokus=0;pokus<2;pokus++){
+    try{
+      const {data,sha}=await GH.nacti(c);
+      const novy=data||{};
+      novy.plan=serializeWeek();
+      novy.kdo=kdo;
+      novy.cas=new Date().toLocaleString("cs");
+      novy.vahy=(novy.vahy||[]).filter(v=>v.kdo!==kdo).concat(mojeVahyVen(kdo));
+      await GH.zapis(c,novy,sha);
+      setSync("Týden je nahoře. Druhý si ho stáhne tlačítkem vedle.");
+      return;
+    }catch(e){
+      if(e.status===409&&pokus===0)continue;          // někdo psal mezitím, zkusím znovu
+      setSync(e.status?e.message:"Nepovedlo se spojit s GitHubem — zkontroluj připojení.");
+      return;
+    }
+  }
+}
+
 async function syncPull(potichu){
-  const c=syncCfg();
-  if(!c.url||!c.token){if(!potichu)setSync("Vyplň adresu skriptu a heslo.");return}
+  const c=GH.cfg();
+  if(!c.owner||!c.token){if(!potichu)setSync("Vyplň uživatele a token.");return}
+  const kdo=c.who||"?";
   if(!potichu)setSync("Stahuji…");
   try{
-    const r=await fetch(c.url+"?akce=nacti&token="+encodeURIComponent(c.token));
-    const j=await r.json();
-    if(!j.ok){if(!potichu)setSync("Skript odpověděl: "+j.chyba);return}
-    // váhy: beru jen svoje záznamy a doplňuju, co doma chybí
-    const db=DB.read();
-    let pridano=0;
-    (j.vahy||[]).filter(v=>v.kdo===(c.who||"?")).forEach(v=>{
-      if(!db.weights.find(x=>x.d===v.d)){db.weights.push({d:v.d,kg:v.kg});pridano++}
-    });
-    if(pridano){db.weights.sort((a,b)=>a.d<b.d?-1:1);DB.save()}
-    if(j.plan){
-      STATE.w=deserializeWeek(j.plan);
-      // porce mimo hrnec přepočítám na svoje čísla, jídla zůstanou stejná
+    const {data}=await GH.nacti(c);
+    if(!data){if(!potichu)setSync("V datovém repozitáři zatím žádný týden není.");return}
+    const pridano=vahyDovnitr(data.vahy,kdo);
+    if(data.plan){
+      STATE.w=deserializeWeek(data.plan);
+      // porce mimo společný hrnec přepočítám na svoje čísla, jídla zůstanou stejná
       STATE.w.week.forEach(d=>tuneDay(d,STATE.tg));
       render();
-      setSync(`Načteno od: ${j.kdo||"?"} (${j.cas||"?"})`+(pridano?` · doplněno ${pridano} vážení`:""));
-    }else if(!potichu){setSync("Ve sdílené tabulce zatím žádný týden není.")}
-  }catch(e){if(!potichu)setSync("Nepovedlo se spojit se skriptem — zkontroluj adresu a připojení.")}
+      setSync(`Načteno od: ${data.kdo||"?"} (${data.cas||"?"})`+(pridano?` · doplněno ${pridano} vážení`:""));
+    }else{
+      if(pridano)renderWeight();
+      if(!potichu)setSync("Ve sdílených datech zatím žádný týden není.");
+    }
+  }catch(e){
+    if(!potichu)setSync(e.status?e.message:"Nepovedlo se spojit s GitHubem — zkontroluj připojení.");
+  }
 }
 
 /* ============ init ============ */
@@ -855,11 +844,9 @@ document.getElementById("daytypes").innerHTML=DAYS.map((n,d)=>
 document.getElementById("trainbox").innerHTML=DAYS.map((n,d)=>
   `<label><input type="checkbox" id="tr${d}"${(d===1||d===3)?" checked":""}> ${DAYSHORT[d]}</label>`).join("");
 
-document.getElementById("mode").onchange=()=>{toggleMode();go(STATE.seed||1);touchPlan()};
-document.getElementById("gen").onclick=()=>{go(STATE.seed||1);touchPlan()};
-document.getElementById("shuffle").onclick=()=>{go(Math.floor(Math.random()*99999)+1);touchPlan()};
-document.getElementById("syncSave").onclick=saveSync;
-document.getElementById("syncBtn").onclick=()=>{saveSync();syncNow()};
+document.getElementById("mode").onchange=()=>{toggleMode();go(STATE.seed||1)};
+document.getElementById("gen").onclick=()=>go(STATE.seed||1);
+document.getElementById("shuffle").onclick=()=>go(Math.floor(Math.random()*99999)+1);
 document.getElementById("print").onclick=()=>window.print();
 document.getElementById("wsave").onclick=()=>{
   const el=document.getElementById("wkg");saveWeight(parseFloat(String(el.value).replace(",",".")));el.value="";
@@ -880,7 +867,7 @@ document.getElementById("notif").onclick=()=>{
 document.getElementById("ics").onclick=makeICS;
 document.getElementById("export").onclick=()=>{
   download("jidelnicek-zaloha-"+today()+".json",JSON.stringify(DB.read(),null,2),"application/json");
-  setStatus("Soubor ulož do složky na Google Disku — z ní ho pak načteš na jakémkoliv zařízení.");
+  setStatus("Soubor si ulož, kam chceš — tlačítkem vedle ho kdykoliv načteš zpátky.");
 };
 document.getElementById("importBtn").onclick=()=>document.getElementById("importFile").click();
 document.getElementById("importFile").onchange=e=>{
@@ -900,19 +887,20 @@ document.getElementById("importFile").onchange=e=>{
 
 document.getElementById("push").onclick=syncPush;
 document.getElementById("pull").onclick=()=>syncPull(false);
-["syncUrl","syncToken","syncWho"].forEach(id=>{
-  document.getElementById(id).onchange=saveSyncCfg;
+["ghOwner","ghRepo","ghToken","ghWho"].forEach(id=>{
+  document.getElementById(id).onchange=()=>GH.save();
 });
 
 const seed=restore();
-const sc=syncCfg();
-document.getElementById("syncUrl").value=sc.url||"";
-document.getElementById("syncToken").value=sc.token||"";
-document.getElementById("syncWho").value=sc.who||"";
+const gc=GH.cfg();
+document.getElementById("ghOwner").value=gc.owner||"";
+document.getElementById("ghRepo").value=gc.repo||"jidelnicek-data";
+document.getElementById("ghToken").value=gc.token||"";
+document.getElementById("ghWho").value=gc.who||"";
 toggleMode();
 go(seed||1);
 checkReminder();
-if(sc.url&&sc.token)syncPull(true);
+if(gc.owner&&gc.token)syncPull(true);
 syncStatus(DB.read().sync&&DB.read().sync.url
   ? "Připojeno. Synchronizuj po každé změně jídelníčku nebo po vážení."
   : "Nepřipojeno — vyplň adresu skriptu a token z návodu.");
