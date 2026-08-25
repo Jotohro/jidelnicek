@@ -1,0 +1,17 @@
+{
+  "name": "Jídelníček",
+  "short_name": "Jídelníček",
+  "description": "Týdenní jídelníček, plán vaření, nákupní seznam a sledování váhy.",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#edf1ec",
+  "theme_color": "#16211d",
+  "lang": "cs",
+  "icons": [
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

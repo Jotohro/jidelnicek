@@ -1,0 +1,925 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#16211d">
+<meta name="mobile-web-app-capable" content="yes">
+<title>Jídelníček</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,700;12..96,800&family=Karla:wght@400;500;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#16211d; --paper:#edf1ec; --card:#fff; --line:#cbd6cc; --muted:#6e7d73;
+  --beet:#a32b5a; --herb:#2e6b4f; --amber:#c9852b; --sage:#7fa08c; --warn:#8a4b12;
+  --heavy:#c0392b; --work:#d97b18; --light:#c9a227; --free:#3f8f5e;
+  --r:4px;
+  --display:"Bricolage Grotesque",system-ui,sans-serif;
+  --body:"Karla",system-ui,sans-serif;
+  --mono:"JetBrains Mono",ui-monospace,monospace;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.5;-webkit-font-smoothing:antialiased}
+.wrap{max-width:1080px;margin:0 auto;padding:0 18px calc(80px + env(safe-area-inset-bottom))}
+header{padding:calc(34px + env(safe-area-inset-top)) 0 24px;border-bottom:2px solid var(--ink)}
+.eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);margin:0 0 12px}
+h1{font-family:var(--display);font-weight:800;font-size:clamp(30px,6vw,54px);line-height:.98;letter-spacing:-.02em;margin:0 0 12px;max-width:17ch}
+h1 em{font-style:normal;color:var(--beet)}
+.lede{max-width:58ch;margin:0;color:var(--muted)}
+section{margin-top:34px}
+.sec-head{display:flex;align-items:baseline;gap:12px;margin-bottom:14px;flex-wrap:wrap}
+h2{font-family:var(--display);font-weight:700;font-size:22px;letter-spacing:-.01em;margin:0}
+.hint{font-size:13px;color:var(--muted)}
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:18px}
+.form-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:14px 18px}
+label{display:block;font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin-bottom:6px}
+input,select{width:100%;font-family:var(--mono);font-size:16px;padding:10px;border:1px solid var(--line);border-radius:var(--r);background:#fbfcfb;color:var(--ink)}
+input:focus,select:focus{outline:2px solid var(--herb);outline-offset:1px}
+.btnrow{display:flex;gap:10px;flex-wrap:wrap;margin-top:18px}
+button{font-family:var(--body);font-weight:700;font-size:14px;cursor:pointer;padding:12px 18px;border-radius:var(--r);border:1px solid var(--ink);background:var(--ink);color:#fff}
+button.ghost{background:transparent;color:var(--ink)}
+button:hover{opacity:.85}
+button:focus-visible{outline:2px solid var(--beet);outline-offset:2px}
+/* výzva k vážení */
+.callout{background:var(--ink);color:#fff;border-radius:var(--r);padding:16px 18px;margin-top:20px;display:none}
+.callout.on{display:block}
+.callout h3{font-family:var(--display);font-size:19px;margin:0 0 4px}
+.callout p{margin:0 0 12px;color:#c3d1c8;font-size:14px}
+.callout .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.callout input{max-width:130px;background:#243430;border-color:#3c4f49;color:#fff}
+.callout button{background:#fff;color:var(--ink);border-color:#fff}
+.callout .later{background:none;color:#c3d1c8;border-color:#3c4f49}
+/* váha */
+.wgrid{display:grid;grid-template-columns:minmax(200px,1fr) 2fr;gap:22px;align-items:start}
+@media (max-width:640px){.wgrid{grid-template-columns:1fr}}
+.wnow{font-family:var(--display);font-weight:800;font-size:44px;line-height:1;letter-spacing:-.03em}
+.wnow small{font-size:16px;color:var(--muted);font-weight:400;font-family:var(--body)}
+.wtrend{font-family:var(--mono);font-size:14px;margin-top:6px}
+.wtrend.down{color:var(--herb)} .wtrend.up{color:var(--beet)} .wtrend.flat{color:var(--muted)}
+.spark{width:100%;height:110px;display:block}
+.whist{margin-top:14px;font-family:var(--mono);font-size:12px;color:var(--muted);display:flex;flex-wrap:wrap;gap:4px 14px}
+.whist b{color:var(--ink);font-weight:400}
+.targets{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:1px;background:var(--line);border:1px solid var(--line);border-radius:var(--r);overflow:hidden}
+.t{background:var(--card);padding:14px 16px}
+.t .k{font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.t .v{font-family:var(--display);font-weight:800;font-size:30px;line-height:1.1;letter-spacing:-.02em}
+.t .u{font-size:12px;color:var(--muted);font-family:var(--body);font-weight:400}
+.t.p .v{color:var(--beet)} .t.c .v{color:var(--herb)} .t.f .v{color:var(--amber)}
+.breakdown{margin-top:14px;font-size:14px;color:var(--muted)}
+.breakdown b{color:var(--ink);font-family:var(--mono);font-weight:700}
+.note{margin-top:12px;font-size:13px;color:var(--warn);border-left:3px solid var(--warn);padding-left:10px}
+.note:empty{display:none}
+.daytypes{display:grid;grid-template-columns:repeat(auto-fit,minmax(112px,1fr));gap:10px}
+.dt{border:1px solid var(--line);border-radius:var(--r);padding:8px 10px}
+.dt select{font-size:13px;padding:7px 6px}
+.trainrow{margin-top:14px;display:flex;gap:14px;flex-wrap:wrap;align-items:center;font-size:14px}
+.trainrow>span{font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.trainrow label{display:inline-flex;gap:5px;align-items:center;text-transform:none;letter-spacing:0;font-size:15px;color:var(--ink);margin:0}
+.trainrow input{width:auto}
+.day{background:var(--card);border:1px solid var(--line);border-left:4px solid var(--line);border-radius:var(--r);padding:16px;margin-bottom:12px}
+.day.HEAVY{border-left-color:var(--heavy)} .day.WORK{border-left-color:var(--work)}
+.day.LIGHT{border-left-color:var(--light)} .day.FREE{border-left-color:var(--free)}
+.day-head{display:flex;align-items:center;gap:10px;margin-bottom:12px;flex-wrap:wrap}
+.day-name{font-family:var(--display);font-weight:800;font-size:19px;letter-spacing:-.01em}
+.badge{font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;padding:2px 7px;border-radius:2px;color:#fff}
+.badge.HEAVY{background:var(--heavy)} .badge.WORK{background:var(--work)}
+.badge.LIGHT{background:var(--light)} .badge.FREE{background:var(--free)}
+.day-nums{font-family:var(--mono);font-size:12px;color:var(--muted);margin-left:auto;text-align:right}
+.day-nums b{color:var(--ink)}
+.strip{display:flex;height:11px;border-radius:2px;overflow:hidden;margin-bottom:14px;background:var(--line)}
+.sl-snidane{background:var(--amber)} .sl-ovoce{background:var(--sage)}
+.sl-obed{background:var(--beet)} .sl-odpol{background:#b98fa4}
+.sl-potrenink{background:#7a6f9b} .sl-vecere{background:var(--herb)} .sl-druha{background:#96b3a1}
+.meals{display:grid;gap:10px}
+.meal{display:grid;grid-template-columns:96px 1fr auto;gap:12px;align-items:start;padding-top:10px;border-top:1px dashed var(--line)}
+.meal:first-child{border-top:0;padding-top:0}
+.slot{font-family:var(--mono);font-size:10px;letter-spacing:.09em;text-transform:uppercase;color:var(--muted);padding-top:3px}
+.slot .dot{display:inline-block;width:7px;height:7px;border-radius:50%;margin-right:5px}
+.mname{font-weight:700;font-size:15px}
+.ings{font-size:13px;color:var(--muted);font-family:var(--mono);line-height:1.6}
+.mkcal{font-family:var(--mono);font-size:12px;color:var(--muted);white-space:nowrap;text-align:right}
+.mkcal b{display:block;color:var(--ink);font-size:14px}
+.tag{display:inline-block;font-family:var(--mono);font-size:10px;letter-spacing:.06em;text-transform:uppercase;border:1px solid var(--line);border-radius:2px;padding:1px 5px;color:var(--muted);margin-left:8px;vertical-align:2px}
+.swap{background:none;border:0;color:var(--muted);font-family:var(--mono);font-size:12px;padding:4px 4px;text-decoration:underline;cursor:pointer;font-weight:400}
+.cook{border-left:3px solid var(--beet);padding-left:14px;margin-bottom:18px}
+.cook:last-child{margin-bottom:0}
+.cook h3{font-family:var(--display);font-size:17px;margin:0 0 4px}
+.cook .when{font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--beet);margin-bottom:6px}
+.cook p{margin:0;font-size:14px;color:var(--muted);font-family:var(--mono);line-height:1.7}
+.cols{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:22px}
+.lgroup h3{font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin:0 0 8px;padding-bottom:6px;border-bottom:1px solid var(--line)}
+.lgroup ul{list-style:none;margin:0;padding:0}
+.lgroup li{display:flex;justify-content:space-between;gap:10px;font-size:14px;padding:4px 0}
+.lgroup li span{font-family:var(--mono);color:var(--muted);white-space:nowrap}
+.status{font-family:var(--mono);font-size:12px;color:var(--muted);margin-top:10px}
+footer{margin-top:46px;padding-top:18px;border-top:1px solid var(--line);font-size:13px;color:var(--muted)}
+@media (max-width:560px){
+  .meal{grid-template-columns:1fr auto}
+  .slot{grid-column:1/-1;padding-top:0}
+  .day-nums{width:100%;text-align:left;margin-left:0}
+}
+@media print{
+  body{background:#fff}
+  .noprint{display:none!important}
+  .day,.card{break-inside:avoid;border-color:#999}
+  section{margin-top:20px} header{padding-top:0}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <p class="eyebrow">Jídelníček · vaří se na dva dny · 10 000 kroků</p>
+  <h1>Týden jídla z toho, co <em>fakt jíš</em>.</h1>
+  <p class="lede">Snídaně, ovoce, oběd a večeře ze stejného hrnce, odpolední puding, druhá večeře. Appka to poskládá na tvoje čísla, řekne, kdy co uvařit, a vypíše nákup.</p>
+  <div class="callout" id="callout">
+    <h3 id="calloutTitle">Je čas se zvážit</h3>
+    <p id="calloutText"></p>
+    <div class="row">
+      <input id="calloutKg" type="number" step="0.1" inputmode="decimal" placeholder="kg">
+      <button id="calloutSave">Zapsat</button>
+      <button id="calloutLater" class="later">Až později</button>
+    </div>
+  </div>
+</header>
+
+<section>
+  <div class="sec-head"><h2>Váha</h2><span class="hint">zapisuj ráno po probuzení, nalačno — jinak měříš snídani</span></div>
+  <div class="card">
+    <div class="wgrid">
+      <div>
+        <div class="wnow" id="wnow">—</div>
+        <div class="wtrend flat" id="wtrend">zatím žádný záznam</div>
+        <div style="margin-top:16px">
+          <label for="wkg">Zapsat dnešní váhu</label>
+          <div style="display:flex;gap:8px">
+            <input id="wkg" type="number" step="0.1" inputmode="decimal" placeholder="kg">
+            <button id="wsave">Uložit</button>
+          </div>
+        </div>
+        <div style="margin-top:14px">
+          <label for="wevery">Připomínat vážení</label>
+          <select id="wevery">
+            <option value="3">Každé 3 dny</option>
+            <option value="7" selected>Jednou týdně</option>
+            <option value="14">Jednou za dva týdny</option>
+          </select>
+        </div>
+      </div>
+      <div>
+        <svg class="spark" id="spark" viewBox="0 0 600 200" preserveAspectRatio="none" aria-label="Průběh váhy"></svg>
+        <div class="whist" id="whist"></div>
+      </div>
+    </div>
+    <div class="btnrow noprint">
+      <button id="notif" class="ghost">Povolit upozornění</button>
+      <button id="ics" class="ghost">Připomínka do kalendáře</button>
+      <button id="export" class="ghost">Záloha na Disk</button>
+      <button id="importBtn" class="ghost">Načíst zálohu</button>
+      <input id="importFile" type="file" accept="application/json" style="display:none">
+    </div>
+    <div class="status" id="status"></div>
+  </div>
+</section>
+
+<section class="noprint">
+  <div class="sec-head"><h2>Sdílení</h2><span class="hint">jídelníček je společný, váha zůstává tvoje</span></div>
+  <div class="card">
+    <div class="form-grid">
+      <div><label for="syncUrl">Adresa skriptu</label><input id="syncUrl" type="url" placeholder="https://script.google.com/macros/s/.../exec"></div>
+      <div><label for="syncToken">Token</label><input id="syncToken" type="text" placeholder="dlouhý náhodný řetězec"></div>
+      <div><label for="syncProfile">Profil</label><input id="syncProfile" type="text" placeholder="pepa"></div>
+    </div>
+    <div class="btnrow">
+      <button id="syncBtn">Synchronizovat</button>
+      <button id="syncSave" class="ghost">Uložit připojení</button>
+    </div>
+    <div class="status" id="syncStatus"></div>
+  </div>
+</section>
+
+<section class="noprint">
+  <div class="sec-head"><h2>Sdílení</h2><span class="hint">jeden týden pro oba, váha zvlášť</span></div>
+  <div class="card">
+    <div class="form-grid">
+      <div><label for="syncUrl">Adresa skriptu</label><input id="syncUrl" type="url" placeholder="https://script.google.com/macros/s/…/exec"></div>
+      <div><label for="syncToken">Heslo</label><input id="syncToken" type="text" placeholder="stejné na obou telefonech"></div>
+      <div><label for="syncWho">Kdo jsi</label><input id="syncWho" type="text" placeholder="třeba Pepa"></div>
+    </div>
+    <div class="btnrow">
+      <button id="push">Sdílet tenhle týden</button>
+      <button id="pull" class="ghost">Načíst sdílený týden</button>
+    </div>
+    <div class="status" id="syncStatus"></div>
+  </div>
+</section>
+
+<section class="noprint">
+  <div class="sec-head"><h2>Cíle</h2><span class="hint">tvoje pásmo: 2 300–2 500 kcal, 150–180 g bílkovin</span></div>
+  <div class="card">
+    <div class="form-grid">
+      <div><label for="mode">Jak počítat</label><select id="mode">
+        <option value="vlastni" selected>Vlastní cíl</option>
+        <option value="vypocet">Spočítat z váhy a kroků</option>
+      </select></div>
+      <div id="w-kcal"><label for="kcal">Kalorie za den</label><input id="kcal" type="number" value="2400" step="50" min="1400" max="4500"></div>
+      <div id="w-prot"><label for="prot">Bílkoviny (g)</label><input id="prot" type="number" value="165" step="5" min="60" max="300"></div>
+      <div class="calc"><label for="sex">Pohlaví</label><select id="sex"><option value="m">Muž</option><option value="z">Žena</option></select></div>
+      <div class="calc"><label for="age">Věk</label><input id="age" type="number" value="27" min="15" max="90"></div>
+      <div class="calc"><label for="height">Výška (cm)</label><input id="height" type="number" value="180" min="130" max="220"></div>
+      <div class="calc"><label for="steps">Kroky za den</label><input id="steps" type="number" value="10000" min="0" max="40000" step="500"></div>
+      <div class="calc"><label for="pace">Tempo hubnutí</label><select id="pace">
+        <option value="0.12">Pomalé (−12 %)</option>
+        <option value="0.18" selected>Mírné (−18 %)</option>
+        <option value="0.25">Rychlejší (−25 %)</option>
+      </select></div>
+    </div>
+    <div class="status" id="calcnote"></div>
+  </div>
+</section>
+
+<section class="noprint">
+  <div class="sec-head"><h2>Jaký je který den</h2><span class="hint">na HEAVY DAY se nevaří — oběd jede ze záchranné varianty</span></div>
+  <div class="card">
+    <div class="daytypes" id="daytypes"></div>
+    <div class="trainrow"><span>Trénink</span><div id="trainbox" style="display:flex;gap:12px;flex-wrap:wrap"></div></div>
+    <div class="btnrow">
+      <button id="gen">Složit týden</button>
+      <button id="shuffle" class="ghost">Přegenerovat</button>
+      <button id="print" class="ghost">Vytisknout / uložit PDF</button>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="sec-head"><h2>Denní cíl</h2><span class="hint" id="targetHint"></span></div>
+  <div class="targets" id="targets"></div>
+  <div class="breakdown" id="breakdown"></div>
+  <div class="note" id="warn"></div>
+</section>
+
+<section>
+  <div class="sec-head"><h2>Týden</h2><span class="hint">„vyměnit" prohodí jídlo a den se přepočítá</span></div>
+  <div id="week"></div>
+</section>
+
+<section>
+  <div class="sec-head"><h2>Kdy co uvařit</h2><span class="hint">jedno vaření pokryje oběd i večeři na dva dny</span></div>
+  <div class="card" id="cook"></div>
+</section>
+
+<section>
+  <div class="sec-head"><h2>Nákupní seznam</h2><span class="hint">na celý týden, syrové váhy</span></div>
+  <div class="card"><div class="cols" id="shop"></div></div>
+</section>
+
+<footer>
+  Hodnoty surovin jsou průměry běžných značek, ne opsané etikety — u brandovaných věcí se můžou lišit o pár procent. Data zůstávají v telefonu; zálohu na Disk si musíš uložit ručně. Je to plán, ne lékařská rada.
+</footer>
+
+</div>
+
+<script>
+/* ============ suroviny: kcal / bílkoviny / sacharidy / tuky na 100 g ============ */
+const ING={
+ chleb:{n:"Chleba žitný/celozrnný",k:245,p:7,c:45,f:1.2,cat:"pecivo"},
+ toast:{n:"Toastový chléb",k:265,p:8,c:48,f:3.5,cat:"pecivo",step:25},
+ rohlik:{n:"Rohlík",k:290,p:9,c:56,f:3,cat:"pecivo",step:42},
+ knacke:{n:"Knäckebrot žitný",k:340,p:10,c:65,f:2,cat:"pecivo",step:10},
+ sunka:{n:"Kuřecí prsní šunka 92 %",k:105,p:18,c:1,f:3,cat:"maso",step:12},
+ vejce:{n:"Vejce",k:143,p:12.6,c:0.7,f:9.5,cat:"mleko",step:55},
+ pomaz:{n:"Pomazánkové máslo Choceň",k:250,p:6,c:4,f:24,cat:"mleko",step:25},
+ smetanito:{n:"Smetanito",k:230,p:9,c:6,f:20,cat:"mleko",step:10,lock:true},
+ platkovy:{n:"Plátkový sýr",k:290,p:24,c:1,f:22,cat:"mleko",step:25},
+ zeletava:{n:"Sýr Želetava",k:265,p:10,c:4,f:24,cat:"mleko",step:25},
+ maslo:{n:"Máslo",k:717,p:0.9,c:0.6,f:81,cat:"mleko",lock:true},
+ marmelada:{n:"Meruňková marmeláda",k:240,p:0.4,c:58,f:0,cat:"spiz",lock:true},
+ mleko:{n:"Mléko plnotučné",k:64,p:3.3,c:4.7,f:3.5,cat:"mleko",step:50},
+ protein:{n:"Protein v prášku",k:380,p:78,c:6,f:5,cat:"spiz",step:28},
+ puding:{n:"High Protein Pudding",k:80,p:10,c:5.5,f:1.5,cat:"mleko",step:200,lock:true},
+ riomare:{n:"Rio Mare Insalatissime cous cous",k:155,p:10,c:16,f:5,cat:"spiz",step:160,lock:true},
+ kure:{n:"Kuřecí prsa",k:110,p:23,c:0,f:1.5,cat:"maso"},
+ veprove:{n:"Vepřové ve vlastní šťávě Rekord",k:170,p:16,c:0.5,f:12,cat:"maso",step:180},
+ hovezi:{n:"Mleté hovězí",k:176,p:20,c:0,f:10,cat:"maso"},
+ losos:{n:"Losos",k:208,p:20,c:0,f:13,cat:"maso"},
+ tunak:{n:"Tuňák ve vlastní šťávě",k:116,p:26,c:0,f:1,cat:"maso",step:80},
+ ryze:{n:"Rýže (syrová)",k:352,p:7.5,c:77,f:1,cat:"priloha"},
+ testoviny:{n:"Těstoviny / špagety (syrové)",k:355,p:12.5,c:71,f:1.5,cat:"priloha"},
+ nudle:{n:"Čínské nudle (syrové)",k:350,p:11,c:70,f:2,cat:"priloha"},
+ kuskus:{n:"Kuskus (syrový)",k:376,p:13,c:72,f:1,cat:"priloha"},
+ pohanka:{n:"Pohanka (syrová)",k:343,p:13,c:62,f:3.4,cat:"priloha"},
+ brambory:{n:"Brambory",k:77,p:2,c:17,f:0.1,cat:"priloha"},
+ noky:{n:"Noky",k:175,p:4,c:36,f:0.5,cat:"priloha",step:50},
+ smes:{n:"Zeleninová směs s brokolicí",k:35,p:2.5,c:4,f:0.4,cat:"zelenina",step:350},
+ brokolice:{n:"Brokolice",k:34,p:2.8,c:4,f:0.4,cat:"zelenina",step:50},
+ hrasek:{n:"Hrášek v nálevu Bonduelle",k:78,p:5,c:11,f:0.5,cat:"zelenina",step:130},
+ fazolky:{n:"Fazolky",k:31,p:1.8,c:5,f:0.1,cat:"zelenina",step:100},
+ cuketa:{n:"Cuketa",k:17,p:1.2,c:2,f:0.3,cat:"zelenina"},
+ spenat:{n:"Listový špenát",k:23,p:2.9,c:1.5,f:0.4,cat:"zelenina",step:100},
+ salat:{n:"Salát rodinný mix",k:20,p:1.5,c:2,f:0.3,cat:"zelenina",step:125},
+ ledovy:{n:"Ledový salát",k:14,p:0.9,c:2,f:0.1,cat:"zelenina",step:10},
+ okurka:{n:"Okurka salátová",k:15,p:0.7,c:3,f:0.1,cat:"zelenina"},
+ rajce:{n:"Rajčata",k:18,p:0.9,c:3.5,f:0.2,cat:"zelenina"},
+ cherry:{n:"Cherry rajčata",k:20,p:0.9,c:3.5,f:0.2,cat:"zelenina",step:10},
+ cibulka:{n:"Jarní cibulka",k:32,p:1.8,c:4,f:0.2,cat:"zelenina",lock:true},
+ banan:{n:"Banán",k:89,p:1.1,c:22,f:0.3,cat:"ovoce",step:110},
+ jablko:{n:"Jablko",k:52,p:0.3,c:13,f:0.2,cat:"ovoce",step:150},
+ hruska:{n:"Hruška",k:57,p:0.4,c:13,f:0.1,cat:"ovoce",step:150},
+ pomeranc:{n:"Pomeranč",k:47,p:0.9,c:11,f:0.1,cat:"ovoce",step:150},
+ maliny:{n:"Maliny",k:52,p:1.2,c:9,f:0.6,cat:"ovoce",step:25},
+ reckyjog:{n:"Řecký jogurt bílý",k:100,p:9,c:4,f:5,cat:"mleko",step:140},
+ mozzarella:{n:"Mozzarella",k:250,p:18,c:1,f:20,cat:"mleko",step:25},
+ balkan:{n:"Balkánský sýr",k:260,p:17,c:1,f:21,cat:"mleko",step:25},
+ hermelin:{n:"Hermelín",k:300,p:18,c:1,f:25,cat:"mleko",step:100},
+ orechy:{n:"Vlašské ořechy",k:654,p:15,c:7,f:65,cat:"spiz",step:10},
+ olej:{n:"Olivový olej",k:884,p:0,c:0,f:100,cat:"spiz",lock:true},
+ pesto:{n:"Bazalkové pesto Barilla",k:460,p:5,c:6,f:45,cat:"spiz",step:10},
+ bolognese:{n:"Bolognese Kaiser Franz Josef",k:90,p:5,c:8,f:4,cat:"spiz",step:180},
+ syromacka:{n:"Sýrová omáčka Vitana",k:60,p:2,c:6,f:3,cat:"spiz",step:105,lock:true},
+ maggi:{n:"Fusian omáčka Maggi",k:110,p:2,c:14,f:5,cat:"spiz",step:118,lock:true},
+ bazalka:{n:"Bazalka čerstvá",k:23,p:3,c:1,f:0.6,cat:"spiz",lock:true},
+ skorice:{n:"Skořice",k:247,p:4,c:27,f:1.2,cat:"spiz",lock:true}
+};
+const REC=[
+ {id:"s1",slot:"snidane",n:"Vejce, chleba, šunka",i:[["vejce",165],["chleb",100],["sunka",48],["maslo",10]]},
+ {id:"s2",slot:"snidane",n:"Toast se šunkou a sýrem",i:[["toast",100],["sunka",48],["platkovy",50],["okurka",80],["smetanito",10]]},
+ {id:"s3",slot:"snidane",n:"Protein shake s mlékem",i:[["protein",28],["mleko",500]]},
+ {id:"s4",slot:"snidane",n:"Chleba s pomazánkovým a šunkou",i:[["chleb",100],["pomaz",50],["okurka",50],["sunka",48]]},
+ {id:"s5",slot:"snidane",n:"Knäckebrot se Želetavou",i:[["knacke",60],["zeletava",50],["sunka",72],["cherry",50]]},
+ {id:"s6",slot:"snidane",n:"Míchaná vajíčka se šunkou",i:[["vejce",165],["sunka",48],["chleb",50]]},
+ {id:"s7",slot:"snidane",n:"Rohlíky s marmeládou",i:[["rohlik",84],["marmelada",40],["mleko",100]]},
+ {id:"f1",slot:"ovoce",n:"Banán",i:[["banan",110]]},
+ {id:"f2",slot:"ovoce",n:"Jablko",i:[["jablko",150]]},
+ {id:"f3",slot:"ovoce",n:"Hruška",i:[["hruska",150]]},
+ {id:"f4",slot:"ovoce",n:"Pomeranč",i:[["pomeranc",150]]},
+ {id:"d1",slot:"dish",n:"Kuře, brambory, zeleninová směs",cook:35,i:[["kure",160],["brambory",400],["smes",350]]},
+ {id:"d2",slot:"dish",n:"Kuře, rýže, brokolice",cook:30,i:[["kure",160],["ryze",80],["brokolice",175]]},
+ {id:"d3",slot:"dish",n:"Vepřové ve vlastní šťávě, rýže, hrášek",cook:20,i:[["veprove",180],["ryze",80],["hrasek",130],["cibulka",25]]},
+ {id:"d4",slot:"dish",n:"Špagety bolognese s cuketou",cook:30,i:[["hovezi",120],["testoviny",80],["bolognese",180],["cuketa",150]]},
+ {id:"d5",slot:"dish",n:"Těstoviny s pestem a kuřetem",cook:25,i:[["testoviny",80],["pesto",20],["kure",140],["cuketa",250]]},
+ {id:"d6",slot:"dish",n:"Kuskus, zeleninová směs, kuře",cook:25,i:[["kuskus",90],["smes",350],["kure",150]]},
+ {id:"d7",slot:"dish",n:"Pohanka s fazolkami a kuřetem",cook:30,i:[["pohanka",100],["fazolky",200],["kure",150]]},
+ {id:"d8",slot:"dish",n:"Kuře s čínskými nudlemi",cook:20,i:[["nudle",80],["kure",140],["maggi",118]]},
+ {id:"d9",slot:"dish",n:"Kuře s kuskusem a salátem",cook:20,i:[["kuskus",90],["kure",140],["salat",250]]},
+ {id:"d10",slot:"dish",n:"Losos, brambory, zeleninová směs",cook:35,solo:true,i:[["losos",150],["brambory",300],["smes",175]]},
+ {id:"d11",slot:"dish",n:"Noky se špenátem a sýrovou omáčkou",cook:20,rare:true,i:[["noky",175],["spenat",250],["syromacka",105],["kure",120]]},
+ {id:"z1",slot:"zachrana",n:"Rio Mare Insalatissime × 2",i:[["riomare",320]]},
+ {id:"z2",slot:"zachrana",n:"Tuňák s kuskusem",i:[["tunak",160],["kuskus",80],["cherry",100],["olej",5]]},
+ {id:"p1",slot:"odpol",n:"High Protein Pudding",i:[["puding",200]]},
+ {id:"p2",slot:"odpol",n:"Toast se šunkou a salátem",i:[["toast",50],["sunka",24],["ledovy",40],["pomaz",25]]},
+ {id:"p3",slot:"odpol",n:"Knäckebrot se sýrem a šunkou",i:[["knacke",30],["zeletava",25],["sunka",36],["cherry",50]]},
+ {id:"t1",slot:"potrenink",n:"Protein drink",i:[["protein",28]]},
+ {id:"v1",slot:"druha",n:"Řecký jogurt s ořechy a skořicí",i:[["reckyjog",140],["orechy",20],["skorice",2]]},
+ {id:"v2",slot:"druha",n:"Mozzarella s rajčaty a bazalkou",i:[["mozzarella",100],["rajce",150],["bazalka",3],["olej",5]]},
+ {id:"v3",slot:"druha",n:"Balkánský sýr s okurkou",i:[["balkan",50],["okurka",100],["rajce",50],["olej",5]]},
+ {id:"v4",slot:"druha",n:"Hermelín s chlebem",i:[["hermelin",100],["chleb",50]]},
+ {id:"v5",slot:"druha",n:"Řecký jogurt s malinami a banánem",i:[["reckyjog",140],["maliny",50],["banan",110]]},
+ {id:"v6",slot:"druha",n:"Proteinový puding",i:[["puding",200]]}
+];
+const DAYS=["Pondělí","Úterý","Středa","Čtvrtek","Pátek","Sobota","Neděle"];
+const DAYSHORT=["Po","Út","St","Čt","Pá","So","Ne"];
+const TYPES={HEAVY:"🟥 Heavy",WORK:"🟧 Work",LIGHT:"🟨 Light (škola)",FREE:"🟩 Free"};
+const DEFTYPE=["WORK","WORK","LIGHT","WORK","HEAVY","FREE","FREE"];
+const SLOTNAME={snidane:"Snídaně",ovoce:"Svačina",obed:"Oběd",odpol:"Odp. svačina",potrenink:"Po tréninku",vecere:"Večeře",druha:"Druhá večeře"};
+const CATNAME={maso:"Maso a ryby",mleko:"Mléčné a vejce",pecivo:"Pečivo",priloha:"Přílohy",zelenina:"Zelenina",ovoce:"Ovoce",spiz:"Spíž a hotovky"};
+
+/* ============ úložiště ============ */
+const KEY="jidelnicek.v1";
+let MEM=null;
+const DB={
+  read(){
+    if(MEM)return MEM;
+    try{MEM=JSON.parse(localStorage.getItem(KEY))||{}}catch(e){MEM={}}
+    if(!MEM.weights)MEM.weights=[];
+    return MEM;
+  },
+  save(){try{localStorage.setItem(KEY,JSON.stringify(MEM))}catch(e){/* jen v paměti */}}
+};
+const today=()=>new Date().toISOString().slice(0,10);
+const daysBetween=(a,b)=>Math.round((new Date(b)-new Date(a))/86400000);
+
+/* ============ pomocné ============ */
+function rng(seed){return function(){seed|=0;seed=seed+0x6D2B79F5|0;let t=Math.imul(seed^seed>>>15,1|seed);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
+function macros(a){let m={k:0,p:0,c:0,f:0};for(const key in a){const g=a[key],x=ING[key];m.k+=x.k*g/100;m.p+=x.p*g/100;m.c+=x.c*g/100;m.f+=x.f*g/100}return m}
+function roundAmt(key,g){const x=ING[key];if(x.step)return Math.max(x.step,Math.round(g/x.step)*x.step);return Math.max(5,Math.round(g/5)*5)}
+function scaleRec(rec,f){const a={};rec.i.forEach(([k,g])=>{a[k]=ING[k].lock?g:roundAmt(k,g*f)});return a}
+function basev(rec,key){return rec.i.find(v=>v[0]===key)[1]}
+function latestWeight(){const w=DB.read().weights;return w.length?w[w.length-1].kg:null}
+
+/* ============ cíle ============ */
+function computeTargets(s){
+  if(s.mode==="vlastni"){
+    const f=Math.round(s.kcal*0.3/9);
+    return{kcal:s.kcal,p:s.prot,f,c:Math.round((s.kcal-s.prot*4-f*9)/4),custom:true,warn:""};
+  }
+  const kg=latestWeight();
+  if(!kg)return{kcal:s.kcal,p:s.prot,f:Math.round(s.kcal*0.3/9),c:Math.round((s.kcal-s.prot*4-s.kcal*0.3/9*9)/4),custom:true,warn:"Zatím nemáš zapsanou váhu, takže počítám z vlastního cíle. Zapiš se nahoře a čísla se přepočítají."};
+  const bmr=10*kg+6.25*s.height-5*s.age+(s.sex==="m"?5:-161);
+  const rest=bmr*1.2, walk=s.steps*0.00057*kg, lift=2.5*260/7;
+  const tdee=rest+walk+lift;
+  let kcal=Math.round(tdee*(1-s.pace)/10)*10, warn="";
+  const floor=s.sex==="m"?1600:1350;
+  if(kcal<floor){kcal=floor;warn="Zvolené tempo by tě dostalo pod rozumné minimum. Příjem je zastropovaný — na rychlejší hubnutí přidej kroky, ne ubírej jídlo."}
+  const p=Math.round(1.8*kg);
+  const f=Math.max(Math.round(0.7*kg),Math.round(kcal*0.28/9));
+  const c=Math.round((kcal-p*4-f*9)/4);
+  return{kcal,p,c,f,kg,bmr:Math.round(bmr),rest:Math.round(rest),walk:Math.round(walk),lift:Math.round(lift),tdee:Math.round(tdee),deficit:Math.round(tdee-kcal),warn};
+}
+
+/* ============ stavba týdne ============ */
+let STATE={};
+function pick(slot,n,rand,filter){
+  const pool=REC.filter(r=>r.slot===slot&&(!filter||filter(r)));
+  const out=[],used=new Set();
+  while(out.length<n){
+    const cand=pool.filter(r=>!used.has(r.id));
+    const from=cand.length?cand:pool;
+    const r=from[Math.floor(rand()*from.length)];
+    out.push(r);used.add(r.id);
+    if(used.size>=pool.length)used.clear();
+  }
+  return out;
+}
+function dayMacros(day){const all={};day.meals.forEach(m=>{for(const k in m.a)all[k]=(all[k]||0)+m.a[k]});return macros(all)}
+function tuneDay(day,tg){
+  const open=day.meals.filter(m=>m.slot==="snidane"||m.slot==="druha"||m.slot==="odpol");
+  for(let it=0;it<70;it++){
+    const tot=dayMacros(day), dp=tg.p-tot.p, dk=tg.kcal-tot.k;
+    if(Math.abs(dp)<=5&&Math.abs(dk)<=80)break;
+    let moved=false;
+    if(Math.abs(dp)>5){
+      let best=null;
+      open.forEach(m=>Object.keys(m.a).forEach(key=>{
+        const x=ING[key];if(x.lock)return;
+        const dens=x.p/Math.max(x.k,1);if(dens<0.08)return;
+        const step=x.step||10,b=basev(m.rec,key),next=m.a[key]+(dp>0?step:-step);
+        if(next<Math.max(x.step||5,b*0.5)||next>b*2.1)return;
+        if(!best||dens>best.dens)best={m,key,next,dens};
+      }));
+      if(best){best.m.a[best.key]=best.next;moved=true}
+    }
+    const dk2=tg.kcal-dayMacros(day).k;
+    if(Math.abs(dk2)>80){
+      let best=null;
+      open.forEach(m=>Object.keys(m.a).forEach(key=>{
+        const x=ING[key];if(x.lock)return;
+        const dens=x.c/Math.max(x.k,1);if(dens<0.08)return;
+        const step=x.step||Math.max(5,Math.min(30,Math.round(Math.abs(dk2)/x.k*100/5)*5));
+        const b=basev(m.rec,key),next=m.a[key]+(dk2>0?step:-step);
+        if(next<Math.max(x.step||5,b*0.4)||next>b*2.2)return;
+        if(!best||dens>best.dens)best={m,key,next,dens};
+      }));
+      if(best){best.m.a[best.key]=best.next;moved=true}
+    }
+    if(!moved)break;
+  }
+}
+function buildWeek(s,tg,seed){
+  const rand=rng(seed), pairs=[[0,1],[2,3],[4,5],[6]], dishes=[];
+  pick("dish",4,rand,r=>!r.rare).forEach((r,i)=>{
+    dishes.push((r.solo&&pairs[i].length>1)?pick("dish",1,rand,x=>!x.solo&&!x.rare)[0]:r);
+  });
+  const breakfasts=pick("snidane",7,rand),fruits=pick("ovoce",7,rand),
+        seconds=pick("druha",7,rand),afters=pick("odpol",7,rand,r=>r.id==="p1"||rand()>0.7),
+        rescue=pick("zachrana",4,rand);
+  const dishAmt=dishes.map(r=>{const m=macros(scaleRec(r,1));return scaleRec(r,Math.min(1.5,Math.max(0.7,tg.kcal*0.25/m.k)))});
+  let ri=0;
+  const week=DAYS.map((name,d)=>{
+    const type=s.types[d], pi=pairs.findIndex(p=>p.includes(d)), meals=[];
+    const dish=dishes[pi], amt=dishAmt[pi];
+    meals.push({slot:"snidane",rec:breakfasts[d],a:scaleRec(breakfasts[d],1)});
+    meals.push({slot:"ovoce",rec:fruits[d],a:scaleRec(fruits[d],1)});
+    if(type==="HEAVY"){const r=rescue[ri++%rescue.length];meals.push({slot:"obed",rec:r,a:scaleRec(r,1),rescue:true})}
+    else meals.push({slot:"obed",rec:dish,a:Object.assign({},amt),dish:pi});
+    meals.push({slot:"odpol",rec:afters[d],a:scaleRec(afters[d],1)});
+    if(s.train[d]){const t=REC.find(r=>r.id==="t1");meals.push({slot:"potrenink",rec:t,a:scaleRec(t,1)})}
+    meals.push({slot:"vecere",rec:dish,a:Object.assign({},amt),dish:pi});
+    meals.push({slot:"druha",rec:seconds[d],a:scaleRec(seconds[d],1)});
+    const day={name,type,meals,pair:pi};
+    tuneDay(day,tg);
+    return day;
+  });
+  return{week,dishes,dishAmt,pairs};
+}
+
+/* ============ render ============ */
+function fmtG(key,g){
+  const x=ING[key];
+  if(x.step&&x.step>=100)return Math.round(g/x.step)+"× "+x.step+" g";
+  if(x.step&&["vejce","rohlik","banan","jablko","hruska","pomeranc"].includes(key))return Math.round(g/x.step)+" ks";
+  if(g>=1000)return (g/1000).toFixed(1).replace(".",",")+" kg";
+  return Math.round(g)+" g";
+}
+function renderWeight(){
+  const w=DB.read().weights, now=latestWeight();
+  document.getElementById("wnow").innerHTML=now?now.toFixed(1).replace(".",",")+' <small>kg</small>':"—";
+  // trend: lineární proložení posledních 28 dní
+  const el=document.getElementById("wtrend");
+  const recent=w.filter(r=>daysBetween(r.d,today())<=28);
+  if(recent.length>=2){
+    const x0=new Date(recent[0].d);
+    const xs=recent.map(r=>(new Date(r.d)-x0)/86400000), ys=recent.map(r=>r.kg);
+    const n=xs.length, mx=xs.reduce((a,b)=>a+b)/n, my=ys.reduce((a,b)=>a+b)/n;
+    let num=0,den=0;xs.forEach((x,i)=>{num+=(x-mx)*(ys[i]-my);den+=(x-mx)**2});
+    const perWeek=den?(num/den)*7:0;
+    const cls=perWeek<-0.05?"down":perWeek>0.05?"up":"flat";
+    const sign=perWeek>0?"+":"−";
+    el.className="wtrend "+cls;
+    el.textContent=`${sign}${Math.abs(perWeek).toFixed(2).replace(".",",")} kg za týden · ${recent.length} záznamů za 4 týdny`;
+  }else{
+    el.className="wtrend flat";
+    el.textContent=w.length?"na trend potřebuju aspoň dvě vážení":"zatím žádný záznam";
+  }
+  // sparkline
+  const svg=document.getElementById("spark");
+  if(w.length<2){svg.innerHTML=`<text x="300" y="105" text-anchor="middle" fill="#6e7d73" font-family="monospace" font-size="14">graf naskočí po druhém vážení</text>`}
+  else{
+    const pts=w.slice(-40);
+    const lo=Math.min(...pts.map(p=>p.kg))-0.4, hi=Math.max(...pts.map(p=>p.kg))+0.4;
+    const X=i=>20+i*(560/Math.max(1,pts.length-1));
+    const Y=v=>180-((v-lo)/(hi-lo))*160;
+    const line=pts.map((p,i)=>`${X(i).toFixed(1)},${Y(p.kg).toFixed(1)}`).join(" ");
+    const area=`20,180 ${line} ${X(pts.length-1).toFixed(1)},180`;
+    svg.innerHTML=
+      `<polygon points="${area}" fill="#a32b5a" opacity="0.08"></polygon>`+
+      `<polyline points="${line}" fill="none" stroke="#a32b5a" stroke-width="2.5" vector-effect="non-scaling-stroke"></polyline>`+
+      pts.map((p,i)=>`<circle cx="${X(i).toFixed(1)}" cy="${Y(p.kg).toFixed(1)}" r="3" fill="#a32b5a"></circle>`).join("")+
+      `<text x="20" y="16" fill="#6e7d73" font-family="monospace" font-size="12">${hi.toFixed(1)}</text>`+
+      `<text x="20" y="196" fill="#6e7d73" font-family="monospace" font-size="12">${lo.toFixed(1)}</text>`;
+  }
+  document.getElementById("whist").innerHTML=w.slice(-8).reverse()
+    .map(r=>`<div>${r.d.slice(8)}.${r.d.slice(5,7)}. <b>${r.kg.toFixed(1).replace(".",",")}</b></div>`).join("");
+}
+function checkReminder(){
+  const db=DB.read(), w=db.weights, every=+(db.every||7);
+  const co=document.getElementById("callout");
+  if(db.snooze===today()){co.classList.remove("on");return}
+  let due=false,text="";
+  if(!w.length){due=true;text="Zapiš první váhu — bez ní je jídelníček jen odhad a nepůjde ukázat, jestli to funguje."}
+  else{
+    const d=daysBetween(w[w.length-1].d,today());
+    if(d>=every){due=true;text=`Poslední záznam je ${d} ${d===1?"den":d<5?"dny":"dní"} starý. Ráno, nalačno, na stejné váze.`}
+  }
+  co.classList.toggle("on",due);
+  document.getElementById("calloutText").textContent=text;
+  if(due&&"Notification" in window&&Notification.permission==="granted"&&db.notified!==today()){
+    try{new Notification("Čas se zvážit",{body:text,icon:"icon-192.png",tag:"vazeni"});db.notified=today();DB.save()}catch(e){}
+  }
+}
+function render(){
+  const tg=STATE.tg,W=STATE.w,s=STATE.s;
+  document.getElementById("targets").innerHTML=`
+    <div class="t"><div class="k">Denní příjem</div><div class="v">${tg.kcal}<span class="u"> kcal</span></div></div>
+    <div class="t p"><div class="k">Bílkoviny</div><div class="v">${tg.p}<span class="u"> g</span></div></div>
+    <div class="t c"><div class="k">Sacharidy</div><div class="v">${tg.c}<span class="u"> g</span></div></div>
+    <div class="t f"><div class="k">Tuky</div><div class="v">${tg.f}<span class="u"> g</span></div></div>`;
+  document.getElementById("targetHint").textContent=tg.custom?"vlastní zadání":"deficit "+tg.deficit+" kcal proti odhadovanému výdeji";
+  document.getElementById("breakdown").innerHTML=tg.custom
+    ? "Sedí do tvého pásma 2 300–2 500 kcal a 150–180 g bílkovin."
+    : `Počítáno z <b>${tg.kg.toFixed(1).replace(".",",")}</b> kg: klidový metabolismus <b>${tg.bmr}</b> + běžný den <b>${tg.rest-tg.bmr}</b> + <b>${s.steps.toLocaleString("cs")}</b> kroků <b>${tg.walk}</b> + trénink <b>${tg.lift}</b> = <b>${tg.tdee}</b> kcal.`;
+  document.getElementById("warn").textContent=tg.warn;
+
+  document.getElementById("week").innerHTML=W.week.map((day,di)=>{
+    const tot=dayMacros(day);
+    const strip=day.meals.map(m=>`<span class="sl-${m.slot}" style="flex:${macros(m.a).k}"></span>`).join("");
+    const meals=day.meals.map((m,mi)=>{
+      const mm=macros(m.a);
+      const ings=Object.keys(m.a).map(k=>ING[k].n+" "+fmtG(k,m.a[k])).join(" · ");
+      const tag=m.dish!==undefined?`<span class="tag">z hrnce</span>`:m.rescue?`<span class="tag">bez vaření</span>`:"";
+      return `<div class="meal">
+        <div class="slot"><span class="dot sl-${m.slot}"></span>${SLOTNAME[m.slot]}</div>
+        <div><div class="mname">${m.rec.n}${tag}</div><div class="ings">${ings}</div>
+        <button class="swap noprint" data-d="${di}" data-m="${mi}">vyměnit</button></div>
+        <div class="mkcal"><b>${Math.round(mm.k)}</b>${Math.round(mm.p)} g B</div></div>`}).join("");
+    return `<div class="day ${day.type}">
+      <div class="day-head"><div class="day-name">${day.name}</div><span class="badge ${day.type}">${day.type}</span>
+        <div class="day-nums"><b>${Math.round(tot.k)}</b> kcal · <b>${Math.round(tot.p)}</b> g B · ${Math.round(tot.c)} g S · ${Math.round(tot.f)} g T</div></div>
+      <div class="strip">${strip}</div><div class="meals">${meals}</div></div>`}).join("");
+
+  const cookDay=["V neděli","V úterý","Ve čtvrtek","V sobotu"];
+  document.getElementById("cook").innerHTML=W.pairs.map((p,i)=>{
+    const rec=W.dishes[i];let portions=0;
+    p.forEach(d=>W.week[d].meals.forEach(m=>{if(m.dish===i)portions++}));
+    if(!portions)return `<div class="cook"><div class="when">${cookDay[i]}</div><h3>Nevaří se — heavy dny jedou ze záchranné varianty</h3></div>`;
+    const amt=W.dishAmt[i];
+    const list=Object.keys(amt).map(k=>ING[k].n+" "+fmtG(k,amt[k]*portions)).join(" · ");
+    return `<div class="cook"><div class="when">${cookDay[i]} · na ${p.map(d=>DAYSHORT[d]).join(" a ")} · ${rec.cook} min</div>
+      <h3>${rec.n} — ${portions}× porce</h3><p>${list}</p></div>`}).join("");
+
+  const shop={};
+  W.week.forEach(d=>d.meals.forEach(m=>{for(const k in m.a)shop[k]=(shop[k]||0)+m.a[k]}));
+  const byCat={};Object.keys(shop).forEach(k=>{(byCat[ING[k].cat]=byCat[ING[k].cat]||[]).push(k)});
+  document.getElementById("shop").innerHTML=Object.keys(CATNAME).filter(c=>byCat[c]).map(c=>
+    `<div class="lgroup"><h3>${CATNAME[c]}</h3><ul>`+
+    byCat[c].sort((a,b)=>shop[b]-shop[a]).map(k=>`<li>${ING[k].n}<span>${fmtG(k,shop[k])}</span></li>`).join("")+`</ul></div>`).join("");
+
+  document.querySelectorAll(".swap").forEach(b=>b.onclick=()=>swapMeal(+b.dataset.d,+b.dataset.m));
+  renderWeight();
+}
+function swapMeal(di,mi){
+  const day=STATE.w.week[di],meal=day.meals[mi],tg=STATE.tg;
+  const slot=meal.dish!==undefined?"dish":meal.rescue?"zachrana":meal.slot;
+  const pool=REC.filter(r=>r.slot===slot&&(slot!=="dish"||!r.rare||r.id===meal.rec.id));
+  const next=pool[(pool.findIndex(r=>r.id===meal.rec.id)+1)%pool.length];
+  if(meal.dish!==undefined){
+    const pi=meal.dish,m=macros(scaleRec(next,1));
+    const amt=scaleRec(next,Math.min(1.5,Math.max(0.7,tg.kcal*0.25/m.k)));
+    STATE.w.dishes[pi]=next;STATE.w.dishAmt[pi]=amt;
+    STATE.w.pairs[pi].forEach(d=>{
+      const dd=STATE.w.week[d];
+      dd.meals.forEach(x=>{if(x.dish===pi){x.rec=next;x.a=Object.assign({},amt)}});
+      tuneDay(dd,tg);
+    });
+  }else{meal.rec=next;meal.a=scaleRec(next,1);tuneDay(day,tg)}
+  render();
+}
+
+/* ============ nastavení ============ */
+const F=["mode","kcal","prot","sex","age","height","steps","pace"];
+function readForm(){
+  const s={};F.forEach(k=>s[k]=document.getElementById(k).value);
+  ["kcal","prot","age","height","steps"].forEach(k=>s[k]=+s[k]);
+  s.pace=+s.pace;
+  s.types=DAYS.map((_,d)=>document.getElementById("dt"+d).value);
+  s.train=DAYS.map((_,d)=>document.getElementById("tr"+d).checked);
+  return s;
+}
+function persist(seed){
+  const db=DB.read();
+  db.settings=readForm();db.seed=seed;db.every=+document.getElementById("wevery").value;
+  DB.save();
+}
+function restore(){
+  const db=DB.read(),s=db.settings;
+  if(s){
+    F.forEach(k=>{if(s[k]!==undefined)document.getElementById(k).value=s[k]});
+    if(s.types)s.types.forEach((t,d)=>{const e=document.getElementById("dt"+d);if(e)e.value=t});
+    if(s.train)s.train.forEach((t,d)=>{const e=document.getElementById("tr"+d);if(e)e.checked=t});
+  }
+  if(db.every)document.getElementById("wevery").value=db.every;
+  if(db.sync){
+    document.getElementById("syncUrl").value=db.sync.url||"";
+    document.getElementById("syncToken").value=db.sync.token||"";
+    document.getElementById("syncProfile").value=db.sync.profile||"";
+  }
+  return db.seed;
+}
+function toggleMode(){
+  const calc=document.getElementById("mode").value==="vypocet";
+  document.querySelectorAll(".calc").forEach(e=>e.style.display=calc?"":"none");
+  document.getElementById("w-kcal").style.display=calc?"none":"";
+  document.getElementById("w-prot").style.display=calc?"none":"";
+  document.getElementById("calcnote").textContent=calc
+    ? "Váha se bere z posledního vážení, takže se cíle samy sníží, jak budeš hubnout."
+    : "";
+}
+function go(seed){
+  const s=readForm(),tg=computeTargets(s);
+  STATE={s,tg,w:buildWeek(s,tg,seed),seed};
+  persist(seed);render();
+}
+
+/* ============ akce ============ */
+function saveWeight(kg){
+  if(!(kg>25&&kg<300)){setStatus("Váhu zadej v kilogramech, třeba 84,5.");return}
+  const db=DB.read(),d=today();
+  const ex=db.weights.find(r=>r.d===d);
+  if(ex)ex.kg=kg;else db.weights.push({d,kg});
+  db.weights.sort((a,b)=>a.d<b.d?-1:1);
+  delete db.snooze;DB.save();
+  const s=readForm();STATE.tg=computeTargets(s);
+  STATE.w=buildWeek(s,STATE.tg,STATE.seed||1);
+  render();checkReminder();
+  setStatus("Zapsáno "+kg.toFixed(1).replace(".",",")+" kg.");
+}
+function setStatus(t){const e=document.getElementById("status");e.textContent=t;clearTimeout(e._t);e._t=setTimeout(()=>e.textContent="",5000)}
+function download(name,content,type){
+  const b=new Blob([content],{type});const u=URL.createObjectURL(b);
+  const a=document.createElement("a");a.href=u;a.download=name;a.click();
+  setTimeout(()=>URL.revokeObjectURL(u),2000);
+}
+function makeICS(){
+  const every=+document.getElementById("wevery").value;
+  const d=new Date();d.setDate(d.getDate()+1);d.setHours(7,30,0,0);
+  const fmt=x=>x.toISOString().replace(/[-:]/g,"").split(".")[0]+"Z";
+  const rule=every===7?"FREQ=WEEKLY":every===14?"FREQ=WEEKLY;INTERVAL=2":"FREQ=DAILY;INTERVAL=3";
+  const ics=[
+    "BEGIN:VCALENDAR","VERSION:2.0","PRODID:-//Jidelnicek//CS","CALSCALE:GREGORIAN","BEGIN:VEVENT",
+    "UID:vazeni-"+Date.now()+"@jidelnicek","DTSTAMP:"+fmt(new Date()),
+    "DTSTART:"+fmt(d),"DURATION:PT5M","RRULE:"+rule,
+    "SUMMARY:Zvážit se","DESCRIPTION:Ráno, nalačno, na stejné váze. Pak zapsat do jídelníčku.",
+    "BEGIN:VALARM","TRIGGER:PT0M","ACTION:DISPLAY","DESCRIPTION:Zvážit se","END:VALARM",
+    "END:VEVENT","END:VCALENDAR"
+  ].join("\r\n");
+  download("vazeni.ics",ics,"text/calendar");
+  setStatus("Soubor otevři a přidej do Google kalendáře — připomínka pak chodí i když appku nespustíš.");
+}
+
+/* ============ synchronizace přes Apps Script ============ */
+function touchPlan(){const db=DB.read();db.planT=Date.now();DB.save()}
+function readSync(){
+  return{
+    url:document.getElementById("syncUrl").value.trim(),
+    token:document.getElementById("syncToken").value.trim(),
+    profile:(document.getElementById("syncProfile").value.trim()||"ja")
+  };
+}
+function saveSync(){
+  const db=DB.read();db.sync=readSync();DB.save();
+  syncStatus(db.sync.url?"Připojení uloženo. Teď dej Synchronizovat.":"Adresa skriptu chybí.");
+}
+function syncStatus(t){document.getElementById("syncStatus").textContent=t}
+async function api(action,key,value){
+  const c=DB.read().sync||{};
+  if(!c.url||!c.token)throw new Error("Nejdřív vyplň adresu skriptu a token.");
+  const r=await fetch(c.url,{method:"POST",redirect:"follow",
+    body:JSON.stringify({token:c.token,action,key,value})});
+  const j=await r.json();
+  if(!j.ok)throw new Error(j.error||"Skript vrátil chybu.");
+  return j;
+}
+function mergeWeights(local,remote){
+  const map={};
+  (remote||[]).forEach(r=>map[r.d]=r.kg);
+  (local||[]).forEach(r=>map[r.d]=r.kg);   // vlastní zápis má přednost
+  return Object.keys(map).sort().map(d=>({d,kg:map[d]}));
+}
+async function syncNow(){
+  const db=DB.read();
+  if(!db.sync||!db.sync.url){syncStatus("Nejdřív vyplň adresu skriptu a token.");return}
+  syncStatus("Synchronizuju…");
+  try{
+    const res=await api("get");
+    const remote=res.data||{};
+    const wkey="vaha:"+db.sync.profile;
+    let msg=[];
+
+    // váha — sloučit podle data, vlastní zápis vyhrává
+    const rw=remote[wkey]&&remote[wkey].v&&remote[wkey].v.weights;
+    const merged=mergeWeights(db.weights,rw);
+    if(JSON.stringify(merged)!==JSON.stringify(db.weights)){db.weights=merged;DB.save()}
+    await api("set",wkey,{weights:db.weights});
+    msg.push(db.weights.length+" vážení zazálohováno");
+
+    // jídelníček — vyhrává novější
+    const rp=remote.plan, localT=db.planT||0;
+    if(rp&&rp.t>localT&&rp.v&&rp.v.settings){
+      db.settings=rp.v.settings;db.seed=rp.v.seed;db.planT=rp.t;DB.save();
+      restore();toggleMode();go(db.seed||1);
+      msg.push("stažen novější jídelníček");
+    }else{
+      await api("set","plan",{settings:db.settings,seed:db.seed});
+      db.planT=Date.now();DB.save();
+      msg.push("jídelníček odeslán");
+    }
+    renderWeight();
+    syncStatus("Hotovo v "+new Date().toLocaleTimeString("cs")+" — "+msg.join(", ")+".");
+  }catch(e){
+    syncStatus("Nepovedlo se: "+e.message+" (bez signálu appka jede dál, data se pošlou příště)");
+  }
+}
+
+/* ============ sdílení ============ */
+const val=id=>document.getElementById(id).value.trim();
+function syncCfg(){return DB.read().sync||{}}
+function saveSyncCfg(){
+  const db=DB.read();
+  db.sync={url:val("syncUrl"),token:val("syncToken"),who:val("syncWho")};
+  DB.save();
+}
+function setSync(t){document.getElementById("syncStatus").textContent=t}
+function serializeWeek(){
+  const W=STATE.w;
+  return{
+    seed:STATE.seed,settings:STATE.s,
+    dishes:W.dishes.map(r=>r.id),dishAmt:W.dishAmt,pairs:W.pairs,
+    week:W.week.map(d=>({name:d.name,type:d.type,pair:d.pair,
+      meals:d.meals.map(m=>({slot:m.slot,rec:m.rec.id,a:m.a,dish:m.dish,rescue:m.rescue}))}))
+  };
+}
+function deserializeWeek(p){
+  const byId=id=>REC.find(r=>r.id===id);
+  return{
+    dishes:p.dishes.map(byId),dishAmt:p.dishAmt,pairs:p.pairs,
+    week:p.week.map(d=>({name:d.name,type:d.type,pair:d.pair,
+      meals:d.meals.map(m=>({slot:m.slot,rec:byId(m.rec),a:m.a,dish:m.dish,rescue:m.rescue}))}))
+  };
+}
+async function syncPush(){
+  const c=syncCfg();
+  if(!c.url||!c.token){setSync("Vyplň adresu skriptu a heslo.");return}
+  setSync("Odesílám…");
+  try{
+    const r=await fetch(c.url,{method:"POST",body:JSON.stringify({
+      token:c.token,kdo:c.who||"?",plan:serializeWeek(),vahy:DB.read().weights
+    })});
+    const j=await r.json();
+    setSync(j.ok?"Týden je nahoře. Druhý si ho stáhne tlačítkem vedle.":"Skript odpověděl: "+j.chyba);
+  }catch(e){setSync("Nepovedlo se spojit se skriptem — zkontroluj adresu a připojení.")}
+}
+async function syncPull(potichu){
+  const c=syncCfg();
+  if(!c.url||!c.token){if(!potichu)setSync("Vyplň adresu skriptu a heslo.");return}
+  if(!potichu)setSync("Stahuji…");
+  try{
+    const r=await fetch(c.url+"?akce=nacti&token="+encodeURIComponent(c.token));
+    const j=await r.json();
+    if(!j.ok){if(!potichu)setSync("Skript odpověděl: "+j.chyba);return}
+    // váhy: beru jen svoje záznamy a doplňuju, co doma chybí
+    const db=DB.read();
+    let pridano=0;
+    (j.vahy||[]).filter(v=>v.kdo===(c.who||"?")).forEach(v=>{
+      if(!db.weights.find(x=>x.d===v.d)){db.weights.push({d:v.d,kg:v.kg});pridano++}
+    });
+    if(pridano){db.weights.sort((a,b)=>a.d<b.d?-1:1);DB.save()}
+    if(j.plan){
+      STATE.w=deserializeWeek(j.plan);
+      // porce mimo hrnec přepočítám na svoje čísla, jídla zůstanou stejná
+      STATE.w.week.forEach(d=>tuneDay(d,STATE.tg));
+      render();
+      setSync(`Načteno od: ${j.kdo||"?"} (${j.cas||"?"})`+(pridano?` · doplněno ${pridano} vážení`:""));
+    }else if(!potichu){setSync("Ve sdílené tabulce zatím žádný týden není.")}
+  }catch(e){if(!potichu)setSync("Nepovedlo se spojit se skriptem — zkontroluj adresu a připojení.")}
+}
+
+/* ============ init ============ */
+document.getElementById("daytypes").innerHTML=DAYS.map((n,d)=>
+  `<div class="dt"><label for="dt${d}">${n}</label><select id="dt${d}">`+
+  Object.keys(TYPES).map(t=>`<option value="${t}"${DEFTYPE[d]===t?" selected":""}>${TYPES[t]}</option>`).join("")+
+  `</select></div>`).join("");
+document.getElementById("trainbox").innerHTML=DAYS.map((n,d)=>
+  `<label><input type="checkbox" id="tr${d}"${(d===1||d===3)?" checked":""}> ${DAYSHORT[d]}</label>`).join("");
+
+document.getElementById("mode").onchange=()=>{toggleMode();go(STATE.seed||1);touchPlan()};
+document.getElementById("gen").onclick=()=>{go(STATE.seed||1);touchPlan()};
+document.getElementById("shuffle").onclick=()=>{go(Math.floor(Math.random()*99999)+1);touchPlan()};
+document.getElementById("syncSave").onclick=saveSync;
+document.getElementById("syncBtn").onclick=()=>{saveSync();syncNow()};
+document.getElementById("print").onclick=()=>window.print();
+document.getElementById("wsave").onclick=()=>{
+  const el=document.getElementById("wkg");saveWeight(parseFloat(String(el.value).replace(",",".")));el.value="";
+};
+document.getElementById("calloutSave").onclick=()=>{
+  const el=document.getElementById("calloutKg");saveWeight(parseFloat(String(el.value).replace(",",".")));el.value="";
+};
+document.getElementById("calloutLater").onclick=()=>{
+  const db=DB.read();db.snooze=today();DB.save();document.getElementById("callout").classList.remove("on");
+};
+document.getElementById("wevery").onchange=()=>{persist(STATE.seed);checkReminder()};
+document.getElementById("notif").onclick=()=>{
+  if(!("Notification" in window)){setStatus("Tenhle prohlížeč upozornění neumí.");return}
+  Notification.requestPermission().then(p=>setStatus(p==="granted"
+    ? "Hotovo. Upozornění naskočí, když appku otevřeš a je čas na vážení — na naplánovanou připomínku použij kalendář."
+    : "Upozornění zůstala vypnutá."));
+};
+document.getElementById("ics").onclick=makeICS;
+document.getElementById("export").onclick=()=>{
+  download("jidelnicek-zaloha-"+today()+".json",JSON.stringify(DB.read(),null,2),"application/json");
+  setStatus("Soubor ulož do složky na Google Disku — z ní ho pak načteš na jakémkoliv zařízení.");
+};
+document.getElementById("importBtn").onclick=()=>document.getElementById("importFile").click();
+document.getElementById("importFile").onchange=e=>{
+  const file=e.target.files[0];if(!file)return;
+  const r=new FileReader();
+  r.onload=()=>{
+    try{
+      const data=JSON.parse(r.result);
+      if(!data||!Array.isArray(data.weights))throw 0;
+      MEM=data;DB.save();restore();toggleMode();go(data.seed||1);checkReminder();
+      setStatus("Záloha načtena — "+data.weights.length+" záznamů váhy.");
+    }catch(err){setStatus("Tenhle soubor nevypadá jako záloha jídelníčku.")}
+  };
+  r.readAsText(file);
+  e.target.value="";
+};
+
+document.getElementById("push").onclick=syncPush;
+document.getElementById("pull").onclick=()=>syncPull(false);
+["syncUrl","syncToken","syncWho"].forEach(id=>{
+  document.getElementById(id).onchange=saveSyncCfg;
+});
+
+const seed=restore();
+const sc=syncCfg();
+document.getElementById("syncUrl").value=sc.url||"";
+document.getElementById("syncToken").value=sc.token||"";
+document.getElementById("syncWho").value=sc.who||"";
+toggleMode();
+go(seed||1);
+checkReminder();
+if(sc.url&&sc.token)syncPull(true);
+syncStatus(DB.read().sync&&DB.read().sync.url
+  ? "Připojeno. Synchronizuj po každé změně jídelníčku nebo po vážení."
+  : "Nepřipojeno — vyplň adresu skriptu a token z návodu.");
+document.addEventListener("visibilitychange",()=>{if(!document.hidden)checkReminder()});
+
+if("serviceWorker" in navigator)
+  window.addEventListener("load",()=>navigator.serviceWorker.register("sw.js").catch(()=>{}));
+</script>
+</body>
+</html>
