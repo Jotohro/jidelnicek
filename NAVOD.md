@@ -137,7 +137,10 @@ U jídla vařeného na víc dnů se v porci ukazují jen gramy, ne kusy —
 dvě a čtvrt vejce se na talíř nandat nedá. Kusy zůstávají v sekci
 *Kdy co uvařit*, kde se opravdu odměřují.
 
-Odkudkoliv se vrátíš odkazem *Zpět na rozcestník*. Výběr týdne platí
+Odkudkoliv se vrátíš odkazem *Zpět na rozcestník*, nebo tlačítkem zpět
+v telefonu — to už appku nezavírá, jen se vrátí o krok. **Obnovení
+stránky tě nechá tam, kde jsi**, včetně vybraného týdne; drží se to
+v adrese (`#nakup`, `#jidelnicek/2026-09-07`). Výběr týdne platí
 všude — když přepneš týden a jdeš do nákupního seznamu, je to seznam na
 ten týden.
 
