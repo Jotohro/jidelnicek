@@ -56,8 +56,40 @@ button:focus-visible{outline:2px solid var(--beet);outline-offset:2px}
   background:var(--herb);color:#fff;border-radius:var(--r);padding:12px 14px;font-size:14px}
 .novaverze.on{display:flex}
 .novaverze button{background:#fff;color:var(--herb);border-color:#fff;padding:8px 14px;margin-left:auto}
+.dneskarta{background:var(--card);border:1px solid var(--line);border-left:4px solid var(--beet);
+  border-radius:var(--r);padding:16px;margin-top:22px}
+.dneskarta.jiny{border-left-color:var(--muted);color:var(--muted);font-size:14px}
+.dneskarta h3,.zitrakarta h3{font-family:var(--display);font-weight:800;font-size:19px;letter-spacing:-.01em;
+  margin:0 0 12px;padding-bottom:8px;border-bottom:1px solid var(--line)}
+.dchod{padding:8px 0;border-top:1px dashed var(--line)}
+.dchod:first-of-type{border-top:0;padding-top:0}
+.dhlav{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap;margin-bottom:3px}
+.dline{font-family:var(--mono);font-size:12.5px;line-height:1.6;padding-left:10px;border-left:2px solid var(--line);color:var(--muted)}
+.dline b{font-family:var(--body);font-size:11.5px;letter-spacing:.05em;text-transform:uppercase}
+.dline.pepca{border-left-color:var(--pepca)} .dline.pepca b{color:var(--pepca)}
+.dline.simca{border-left-color:var(--simca)} .dline.simca b{color:var(--simca)}
+.dline.joza{border-left-color:var(--joza)}   .dline.joza b{color:var(--joza)}
+.dvareni{margin-top:12px;padding-top:10px;border-top:1px solid var(--line);font-size:13.5px;color:var(--beet)}
+.zitrakarta{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:14px 16px;margin-top:10px}
+.zitrakarta h3{font-size:16px;margin-bottom:9px;padding-bottom:7px}
+.zrad{display:flex;gap:9px;align-items:baseline;font-size:14px;padding:2px 0}
+.zrad .slot{min-width:104px}
+.tag.cerstve{border-color:var(--herb);color:var(--herb)}
+.tag.zbylo{border-color:var(--amber);color:var(--amber)}
+.nakuplista{display:grid;grid-template-columns:1fr auto;gap:2px 12px;width:100%;text-align:left;
+  background:var(--card);border:1px solid var(--line);border-left:4px solid var(--herb);
+  border-radius:var(--r);padding:14px 16px;margin-top:10px;cursor:pointer;font-weight:400}
+.nakuplista.naliha{border-left-color:var(--heavy)}
+.nakuplista:hover{opacity:1;border-color:var(--ink)}
+.nl-nadpis{font-family:var(--display);font-weight:800;font-size:17px;letter-spacing:-.01em}
+.nl-stav{font-family:var(--mono);font-size:12.5px;color:var(--muted);grid-column:1}
+.nl-stav b{color:var(--heavy)}
+.nl-varovani{grid-column:1/-1;font-size:13px;color:var(--heavy);margin-top:7px;padding-top:7px;border-top:1px solid var(--line)}
+.nl-sipka{grid-row:1/3;align-self:center;font-family:var(--mono);color:var(--muted);font-size:18px}
+.nakuppruh{background:#fdf3e7;border-left:3px solid var(--heavy);padding:10px 12px;margin-bottom:12px;font-size:13.5px;color:var(--warn)}
+.lgroup li.zvyrazneno{background:#fdf3e7;margin-left:-11px;padding-left:8px;border-radius:2px}
 /* rozcestník */
-.tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(215px,1fr));gap:14px;margin-top:26px}
+.tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(215px,1fr));gap:14px;margin-top:18px}
 .tile{display:flex;flex-direction:column;align-items:flex-start;gap:4px;text-align:left;
   background:var(--card);color:var(--ink);border:1px solid var(--line);border-radius:var(--r);
   padding:22px 20px 20px;font-weight:400;cursor:pointer;transition:border-color .15s,transform .15s}
@@ -115,6 +147,7 @@ button:focus-visible{outline:2px solid var(--beet);outline-offset:2px}
 .daytabs button.on{background:var(--ink);color:#fff;border-color:var(--ink);font-weight:700}
 .slotedit{display:grid;grid-template-columns:110px 1fr auto;gap:10px;align-items:center;padding:9px 0;border-top:1px dashed var(--line)}
 .slotedit:first-of-type{border-top:0}
+.slotedit .zamek{color:var(--beet);font-style:normal}
 .slotedit .sname{font-family:var(--mono);font-size:10px;letter-spacing:.09em;text-transform:uppercase;color:var(--muted)}
 .slotedit select{font-size:14px;padding:8px}
 .slotedit .move{width:auto;font-size:12px;padding:8px 6px;color:var(--muted)}
@@ -194,7 +227,8 @@ button:focus-visible{outline:2px solid var(--beet);outline-offset:2px}
 footer{margin-top:42px;padding-top:16px;border-top:1px solid var(--line);font-size:13px;color:var(--muted)}
 @media (max-width:560px){
   .slotedit{grid-template-columns:1fr auto}
-  .slotedit .sname{grid-column:1/-1}
+  .slotedit .zamek{color:var(--beet);font-style:normal}
+.slotedit .sname{grid-column:1/-1}
   .day-nums{width:100%;text-align:left;margin-left:0}
 }
 @media print{
@@ -225,6 +259,7 @@ footer{margin-top:42px;padding-top:16px;border-top:1px solid var(--line);font-si
 
 <!-- ROZCESTNÍK -->
 <div class="view" id="view-home">
+  <div id="dnes"></div>
   <div class="tiles">
     <button class="tile" data-jdi="jidelnicek">
       <svg viewBox="0 0 48 48" aria-hidden="true">
@@ -283,6 +318,7 @@ footer{margin-top:42px;padding-top:16px;border-top:1px solid var(--line);font-si
     <div class="sec-head"><h2>Nákupní seznam</h2><span class="hint">na celý týden, syrové váhy</span></div>
     <div class="card">
       <div class="nakuphead noprint"><span id="nakupPostup"></span><span id="syncStav"></span></div>
+      <div class="nakuppruh noprint" id="nakupPruh" style="display:none"></div>
       <div class="cols" id="shop"></div>
     </div>
     <div class="btnrow noprint">
@@ -651,7 +687,26 @@ function cile(o){
 
 /* ============ plán týdne ============ */
 function prazdnyPlan(){
-  return{dny:DAYS.map(()=>({snidane:null,svacina:null,odpol:null,druha:null})),hrnce:[null,null,null,null],polevky:[null,null,null,null]};
+  return{dny:DAYS.map(()=>({snidane:null,svacina:null,odpol:null,druha:null})),
+         hrnce:[null,null,null,null],polevky:[null,null,null,null],
+         zamky:{dny:DAYS.map(()=>({})),hrnce:{},polevky:{}}};
+}
+function zamky(p){
+  if(!p.zamky)p.zamky={dny:DAYS.map(()=>({})),hrnce:{},polevky:{}};
+  if(!p.zamky.dny)p.zamky.dny=DAYS.map(()=>({}));
+  return p.zamky;
+}
+function zamkni(p,co){
+  const z=zamky(p);
+  if(co.typ==="hrnec")z.hrnce[co.i]=true;
+  else if(co.typ==="polevka")z.polevky[co.i]=true;
+  else z.dny[co.d][co.slot]=true;
+}
+function jeZamceno(p,co){
+  const z=zamky(p);
+  if(co.typ==="hrnec")return !!z.hrnce[co.i];
+  if(co.typ==="polevka")return !!z.polevky[co.i];
+  return !!(z.dny[co.d]&&z.dny[co.d][co.slot]);
 }
 function planTydne(iso){
   const db=DB.read();
@@ -690,8 +745,57 @@ function ohodnotDny(dny,p,hrnce,polevky,tg){
   return x;
 }
 
+/* Projde zadaná místa a u každého zkusí všechna povolená jídla; nechá to,
+   po kterém dané dny dopadnou nejlíp. Zamčená místa nechává být. */
+function optimalizuj(iso,mista,kola){
+  const p=planTydne(iso), tg=cilePro(), rand=rng(Date.now()%99991);
+  const zkus=(misto,idFn)=>{
+    let kandidati=misto.typ==="hrnec"?nabidka("obed").filter(r=>!r.rare)
+                 :misto.typ==="polevka"?nabidka("polevka")
+                 :nabidka(misto.slot);
+    if(misto.typ==="hrnec"){
+      const sousedi=[p.hrnce[misto.i-1],p.hrnce[misto.i+1]].filter(Boolean);
+      const bez=kandidati.filter(r=>!sousedi.includes(r.id));
+      if(bez.length>=2)kandidati=bez;
+    }
+    if(kandidati.length<2)return;
+    let nej=null;
+    kandidati.forEach(r=>{
+      idFn(r.id);
+      const {hrnce,polevky}=hrnceZPlanu(p,tg);
+      const skore=ohodnotDny(misto.dny,p,hrnce,polevky,tg);
+      if(!nej||skore<nej.skore-1e-9)nej={id:r.id,skore};
+      else if(Math.abs(skore-nej.skore)<0.15&&rand()<0.35)nej={id:r.id,skore};
+    });
+    idFn(nej.id);
+  };
+  for(let kolo=0;kolo<(kola||2);kolo++){
+    mista.filter(m=>!jeZamceno(p,m)).forEach(m=>{
+      if(m.typ==="hrnec")zkus(m,id=>p.hrnce[m.i]=id);
+      else if(m.typ==="polevka")zkus(m,id=>p.polevky[m.i]=id);
+      else zkus(m,id=>p.dny[m.d][m.slot]=id);
+    });
+  }
+  DB.save();
+}
+/* Uživatel něco změnil — dorovnat zbytek dotčených dnů kolem jeho volby. */
+function prizpusobOkoli(iso,co){
+  const p=planTydne(iso);
+  zamkni(p,co);
+  const dny=co.typ==="volne"?[co.d]:PAIRS[co.i];
+  const mista=[];
+  PAIRS.forEach((par,i)=>{
+    if(!par.some(d=>dny.includes(d)))return;
+    mista.push({typ:"hrnec",i,dny:par});
+    if(jeVikend(i))mista.push({typ:"polevka",i,dny:par});
+  });
+  dny.forEach(d=>VOLNE.forEach(slot=>mista.push({typ:"volne",d,slot,dny:[d]})));
+  optimalizuj(iso,mista,2);
+}
+
 function doplnPlan(iso,odznova){
   const p=planTydne(iso), tg=cilePro();
+  if(odznova)p.zamky={dny:DAYS.map(()=>({})),hrnce:{},polevky:{}};
   const rand=rng(odznova?Date.now()%99991:iso.split("-").join("")%99991+7);
   const nahodne=pole=>pole[Math.floor(rand()*pole.length)];
 
@@ -712,7 +816,7 @@ function doplnPlan(iso,odznova){
         Měněná jsou jen ta místa, která se doplňovala. */
   const menitelne=[];
   PAIRS.forEach((par,i)=>{
-    if(odznova||!p.hrnce[i]||true)menitelne.push({typ:"hrnec",i,dny:par});
+    menitelne.push({typ:"hrnec",i,dny:par});
     if(jeVikend(i)&&p.polevky[i])menitelne.push({typ:"polevka",i,dny:par});
   });
   p.dny.forEach((den,d)=>VOLNE.forEach(slot=>menitelne.push({typ:"volne",d,slot,dny:[d]})));
@@ -739,7 +843,7 @@ function doplnPlan(iso,odznova){
     idFn(nej.id);
   };
   for(let kolo=0;kolo<2;kolo++){
-    menitelne.forEach(m=>{
+    menitelne.filter(m=>!jeZamceno(p,m)).forEach(m=>{
       if(m.typ==="hrnec")zkus(m,id=>p.hrnce[m.i]=id);
       else if(m.typ==="polevka")zkus(m,id=>p.polevky[m.i]=id);
       else zkus(m,id=>p.dny[m.d][m.slot]=id);
@@ -766,6 +870,16 @@ function doplnPlan(iso,odznova){
 
   DB.save();
   return p;
+}
+
+/* Jídelníček se drží připravený na měsíc dopředu. */
+function pripravMesic(odIso){
+  const zaklad=odIso||pondeli(dnes());
+  for(let t=0;t<5;t++){
+    const iso=posun(zaklad,t*7), p=planTydne(iso);
+    const prazdny=p.hrnce.some(x=>!x)||p.dny.some(d=>VOLNE.some(s=>!d[s]));
+    if(prazdny)doplnPlan(iso,false);
+  }
 }
 
 function dolad(volna,zbyva,tg){
@@ -1007,20 +1121,20 @@ function tvar(n,slova){
   return cele+" "+slova[2];
 }
 
-function fmtG(key,g){
+function fmtG(key,g,bezPoctu){
   const vaha = g>=1000 ? (g/1000).toFixed(1).replace(".",",")+" kg" : Math.round(g)+" g";
   const m=MIRY[key];
-  if(!m||!m[0])return vaha;
+  if(!m||!m[0]||bezPoctu)return vaha;
   const presne=g/m[0];
   const n = presne<3 ? Math.round(presne*4)/4 : Math.round(presne);
   if(n<0.25)return vaha;
   if(Math.abs(presne-n)/n>0.25)return vaha;   /* když je počet daleko od celého dílu, radši jen gramy */
   return vaha+" ("+tvar(n,m[1])+")";
 }
-const soupis=a=>Object.keys(a).map(k=>ING[k].n+" "+fmtG(k,a[k])).join(" · ");
+const soupis=(a,bezPoctu)=>Object.keys(a).map(k=>ING[k].n+" "+fmtG(k,a[k],bezPoctu)).join(" · ");
 const cz=n=>n.toLocaleString("cs");
 
-let TYDEN, VYPOCET, AKTDEN=0;
+let TYDEN, VYPOCET, AKTDEN=0, ZVYRAZNIT=false;
 
 /* ============ lidi ============ */
 function renderPeople(){
@@ -1170,7 +1284,7 @@ function renderEditor(){
     }
     const opts=mozne.map(r=>`<option value="${r.id}"${r.id===hodnota?" selected":""}>${r.n}${zapnuto(r.id)?"":" (mimo nabídku)"}</option>`).join("");
     return `<div class="slotedit">
-      <div class="sname">${SLOTNAME[slot]}</div>
+      <div class="sname">${SLOTNAME[slot]}${jeZamceno(p,slot==="obed"?{typ:"hrnec",i:pi}:slot==="polevka"?{typ:"polevka",i:pi}:{typ:"volne",d:AKTDEN,slot})?' <em class="zamek" title="vybráno ručně">•</em>':''}</div>
       <select data-slot="${slot}"><option value="">${slot==="polevka"?"— bez polévky —":"— vyber —"}</option>${opts}</select>
       ${presun?`<select class="move" data-move="${slot}"><option value="">přehodit na…</option>`+
         DAYS.map((n,d)=>d===AKTDEN?"":`<option value="${d}">${DAYSHORT[d]}</option>`).join("")+`</select>`:`<span class="tag">${PAIRS[pi].length>1?"na víc dnů":"jen na"} ${PAIRS[pi].map(d=>DAYSHORT[d]).join("+")}</span>`}
@@ -1190,7 +1304,11 @@ function renderEditor(){
     if(slot==="obed")p.hrnce[pi]=s.value||null;
     else if(slot==="polevka")p.polevky[pi]=s.value||null;
     else p.dny[AKTDEN][slot]=s.value||null;
+    if(s.value)prizpusobOkoli(TYDEN,slot==="obed"?{typ:"hrnec",i:pi}
+                                 :slot==="polevka"?{typ:"polevka",i:pi}
+                                 :{typ:"volne",d:AKTDEN,slot});
     DB.save();oznacZmenu();prekresli();
+    setStatus(s.value?"Vybráno. Zbytek dne jsem dorovnal, ať sedí kalorie i živiny.":"");
   });
   document.querySelectorAll("[data-move]").forEach(s=>s.onchange=()=>{
     const slot=s.dataset.move, cil=+s.value;
@@ -1198,6 +1316,8 @@ function renderEditor(){
     const tmp=p.dny[cil][slot];
     p.dny[cil][slot]=p.dny[AKTDEN][slot];
     p.dny[AKTDEN][slot]=tmp;
+    zamkni(p,{typ:"volne",d:cil,slot});zamkni(p,{typ:"volne",d:AKTDEN,slot});
+    prizpusobOkoli(TYDEN,{typ:"volne",d:cil,slot});
     DB.save();oznacZmenu();prekresli();
   });
 
@@ -1292,6 +1412,72 @@ function renderNabidka(){
 }
 
 /* ============ týden ============ */
+/* ============ dnešek a zítřek na hlavní stránce ============ */
+function renderDnes(){
+  const box=document.getElementById("dnes");if(!box)return;
+  const d=dnesIndex();
+  if(d===null){
+    box.innerHTML=`<div class="dneskarta jiny">Prohlížíš jiný týden. Dnešek najdeš tlačítkem <b>dnešní</b> nahoře.</div>`;
+    return;
+  }
+  const den=VYPOCET.dny[d], zitra=VYPOCET.dny[d+1];
+  const puvod=m=>{
+    if(m.hrnec===undefined)return "";
+    const par=PAIRS[m.hrnec];
+    if(d===par[0])return `<span class="tag cerstve">uvařeno včera večer</span>`;
+    if(par.length>1&&d===par[1])return `<span class="tag zbylo">zbylo ze včerejška</span>`;
+    return "";
+  };
+  const lidi=m=>LIDE.filter(o=>m.porce[o.id]).map(o=>
+    `<div class="dline ${o.id}"><b>${o.jmeno}</b> ${soupis(m.porce[o.id],m.hrnec!==undefined)}</div>`).join("");
+  const chody=den.jidla.map(m=>`<div class="dchod">
+      <div class="dhlav"><span class="slot"><span class="dot sl-${m.slot}"></span>${SLOTNAME[m.slot]}</span>
+      <span class="mname">${m.rec.n}</span>${puvod(m)}</div>${lidi(m)}</div>`).join("")
+    ||`<div class="hint">Dnešek není složený — doplň ho v Úpravě jídelníčku.</div>`;
+
+  let vareni="";
+  PAIRS.forEach((par,pi)=>{
+    if(Math.max(0,varitVDen(pi))!==d)return;
+    const h=VYPOCET.hrnce[pi];if(!h)return;
+    const pol=VYPOCET.polevky[pi];
+    const naDny=par.map(x=>DAYS[x].toLowerCase()).join(" a ");
+    vareni=`<div class="dvareni">Dnes večer se vaří <b>${h.rec.n}</b>${pol?` a ${pol.rec.n.toLowerCase()}`:""} — ${pocetPorci(pi)} porcí na ${naDny}.</div>`;
+  });
+
+  const zitrek=zitra
+    ? `<div class="zitrakarta"><h3>Zítra · ${zitra.nazev} ${dmt(zitra.datum)}</h3>`+
+      ([...new Map(zitra.jidla.map(m=>[m.rec.id+m.slot,m])).values()]
+        .filter(m=>m.slot!=="vecere")
+        .map(m=>`<div class="zrad"><span class="slot"><span class="dot sl-${m.slot}"></span>${SLOTNAME[m.slot]}</span> ${m.rec.n}</div>`).join("")
+       ||`<div class="hint">Zítřek zatím není složený.</div>`)+`</div>`
+    : `<div class="zitrakarta"><h3>Zítra</h3><div class="hint">Zítřek patří do dalšího týdne — přepni ho šipkou nahoře.</div></div>`;
+
+  box.innerHTML=`<div class="dneskarta">
+      <h3>Dnes · ${den.nazev} ${dmt(den.datum)}</h3>${chody}${vareni}</div>${zitrek}${nakupLista()}`;
+  const l=document.getElementById("nakupLista");
+  if(l)l.onclick=()=>{ZVYRAZNIT=true;renderShop();jdi("nakup")};
+}
+
+function nakupLista(){
+  const shop={};
+  VYPOCET.dny.forEach(den=>den.jidla.forEach(m=>LIDE.forEach(o=>{
+    const a=m.porce[o.id];if(!a)return;
+    for(const k in a)shop[k]=(shop[k]||0)+a[k];
+  })));
+  const klice=Object.keys(shop);
+  if(!klice.length)return "";
+  const terminy=terminySurovin(), d=dnesIndex();
+  const spech=klice.filter(k=>!odskrtnuto(k)&&d!==null&&potrebaKdy(terminy,k,d));
+  const zbyva=klice.filter(k=>!odskrtnuto(k)).length;
+  const varovani=chybiKoupit();
+  return `<button class="nakuplista${spech.length?" naliha":""}" id="nakupLista">
+      <span class="nl-nadpis">Nákupní seznam</span>
+      <span class="nl-stav">${zbyva?`zbývá ${zbyva} ${polozek(zbyva)}`:"všechno koupeno"}${spech.length?` · <b>${spech.length} nutně</b>`:""}</span>
+      ${varovani&&spech.length?`<span class="nl-varovani">${varovani}</span>`:""}
+      <span class="nl-sipka">→</span>
+    </button>`;
+}
+
 function renderPrumery(){
   const box=document.getElementById("prumery");if(!box)return;
   box.innerHTML=`<div class="prumtab">`+LIDE.filter(o=>o.cely).map(o=>{
@@ -1314,7 +1500,7 @@ function renderWeek(){
   document.getElementById("week").innerHTML=VYPOCET.dny.map((den,d)=>{
     const jidla=den.jidla.map(m=>{
       const lidi=LIDE.filter(o=>m.porce[o.id]).map(o=>
-        `<div class="pline ${o.id}"><b>${o.jmeno}</b> <span>${soupis(m.porce[o.id])} · ${Math.round(macros(m.porce[o.id]).k)} kcal</span></div>`).join("");
+        `<div class="pline ${o.id}"><b>${o.jmeno}</b> <span>${soupis(m.porce[o.id],m.hrnec!==undefined)} · ${Math.round(macros(m.porce[o.id]).k)} kcal</span></div>`).join("");
       return `<div class="meal">
         <div class="mtop"><span class="slot"><span class="dot sl-${m.slot}"></span>${SLOTNAME[m.slot]}</span>
         <span class="mname">${m.rec.n}</span>${m.hrnec!==undefined?'<span class="tag">jídlo na víc dnů</span>':""}</div>
@@ -1380,12 +1566,18 @@ function renderShop(){
     return `<div class="lgroup"><h3>${CATNAME[c]}</h3><ul>`+
       polozky.map(k=>{
         const hot=odskrtnuto(k);
-        return `<li class="${hot?"hotovo":""}${spech(k)?" spech":""}"><label>
+        return `<li class="${hot?"hotovo":""}${spech(k)?" spech":""}${spech(k)&&ZVYRAZNIT?" zvyrazneno":""}"><label>
           <input type="checkbox" data-nakup="${k}"${hot?" checked":""}>
           <span class="nazev">${ING[k].n}${spech(k)?`<em class="kdy">${kdyPotreba(k)}</em>`:""}</span></label>
           <span>${fmtG(k,shop[k])}</span></li>`;
       }).join("")+`</ul></div>`;
   }).join("");
+  const pruh=document.getElementById("nakupPruh");
+  if(pruh){
+    const kolik=klice.filter(spech).length;
+    pruh.style.display=(ZVYRAZNIT&&kolik)?"block":"none";
+    pruh.textContent=kolik?`Zvýrazněné položky jsou potřeba na dnešek a zítřek — bez nich se nedá uvařit, co je v plánu.`:"";
+  }
   document.getElementById("shop").innerHTML=html||
     (klice.length?'<div class="hint">Všechno koupeno. 🎉</div>':'<div class="hint">Zatím není co nakupovat — týden je prázdný.</div>');
 
@@ -1518,7 +1710,7 @@ function prekresli(){
   document.getElementById("wrange").textContent="("+dmt(TYDEN)+" – "+dmt(posun(TYDEN,6))+")";
   renderPeople();
   renderEditor();renderNabidka();
-  renderWeek();renderPrumery();renderCook();renderShop();checkReminder();stavPodleSite();
+  renderWeek();renderPrumery();renderCook();renderShop();renderDnes();checkReminder();stavPodleSite();
 }
 
 /* ============ sdílení přes GitHub ============ */
@@ -1667,13 +1859,13 @@ function jdi(kam){
   window.scrollTo({top:0,behavior:"instant"});
 }
 document.querySelectorAll("[data-jdi]").forEach(b=>b.onclick=()=>jdi(b.dataset.jdi));
-document.querySelectorAll("[data-zpet]").forEach(b=>b.onclick=()=>jdi("home"));
+document.querySelectorAll("[data-zpet]").forEach(b=>b.onclick=()=>{ZVYRAZNIT=false;renderShop();jdi("home")});
 
 /* ============ start ============ */
 TYDEN=pondeli(dnes());
 
-document.getElementById("wprev").onclick=()=>{TYDEN=posun(TYDEN,-7);AKTDEN=0;prekresli()};
-document.getElementById("wnext").onclick=()=>{TYDEN=posun(TYDEN,7);AKTDEN=0;prekresli()};
+document.getElementById("wprev").onclick=()=>{TYDEN=posun(TYDEN,-7);AKTDEN=0;pripravMesic(TYDEN);prekresli()};
+document.getElementById("wnext").onclick=()=>{TYDEN=posun(TYDEN,7);AKTDEN=0;pripravMesic(TYDEN);prekresli()};
 document.getElementById("wtoday").onclick=()=>{TYDEN=pondeli(dnes());AKTDEN=0;prekresli()};
 document.getElementById("fill").onclick=()=>{doplnPlan(TYDEN,false);oznacZmenu();prekresli()};
 document.getElementById("regen").onclick=()=>{doplnPlan(TYDEN,true);oznacZmenu();prekresli()};
@@ -1713,7 +1905,7 @@ function startNastaveni(){
   document.getElementById("ghToken").value=c.token||"";
 }
 startNastaveni();
-if(!Object.keys(DB.read().plany).length)doplnPlan(TYDEN,false);
+pripravMesic(TYDEN);
 prekresli();
 jdi("home");
 document.addEventListener("visibilitychange",()=>{if(!document.hidden){checkReminder();autoSync()}});

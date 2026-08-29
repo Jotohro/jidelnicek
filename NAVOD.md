@@ -119,6 +119,24 @@ Po spuštění je nahoře **výběr týdne** — šipky doleva a doprava, vedle
 - **Nákupní seznam** — všechno na celý týden, položky jdou odškrtávat
 - **Úprava jídelníčku** — skládání, nabídka jídel, čísla lidí, sdílení
 
+Nad dlaždicemi je **dnešek** — všechny chody s gramážemi pro každého.
+U oběda a večeře je štítek, odkud se jídlo bere: *uvařeno včera večer*,
+nebo *zbylo ze včerejška*. Když se ten den vaří nová dávka, je pod tím
+řádek co, kolik porcí a na které dny.
+
+Pod dneškem je **zítřek** ve zkratce, jen názvy jídel.
+
+Úplně dole je **lišta nákupního seznamu**: kolik položek zbývá a kolik
+z nich je potřeba na dnešek a zítřek. Když něco chybí, lišta zčervená
+a napíše co. Klepnutím se dostaneš rovnou do seznamu, kde jsou ty
+položky **žlutě zvýrazněné** a nahoře je vysvětlení proč.
+
+Když si prohlížíš jiný týden, místo dneška je tam odkaz zpátky na dnešní.
+
+U jídla vařeného na víc dnů se v porci ukazují jen gramy, ne kusy —
+dvě a čtvrt vejce se na talíř nandat nedá. Kusy zůstávají v sekci
+*Kdy co uvařit*, kde se opravdu odměřují.
+
 Odkudkoliv se vrátíš odkazem *Zpět na rozcestník*. Výběr týdne platí
 všude — když přepneš týden a jdeš do nákupního seznamu, je to seznam na
 ten týden.
@@ -139,6 +157,16 @@ proužek se jmény. Váhy se zapisují v Úpravě jídelníčku.
    na neděli. Ve všední dny se řádek polévky vůbec neukáže. Dá se nechat
    prázdná („bez polévky"), nebo si všechny polévky odškrtni v nabídce.
 6. **Doplnit prázdná místa** vyplní, co chybí, a nechá být, cos vybral.
+
+**Jídelníček se dělá sám na měsíc dopředu.** Při spuštění appka připraví
+aktuální týden a čtyři následující; když přepneš na další, doplní ho taky.
+Trvá to zhruba půl vteřiny na pět týdnů.
+
+**Když jedno jídlo změníš, zbytek se dorovná.** Tvoje volba se zamkne
+(v editoru ji poznáš podle tečky u názvu chodu) a appka přeskládá
+ostatní jídla dotčených dnů tak, aby kalorie i živiny zase seděly.
+Zamčená jídla nechává být — i při *Doplnit prázdná místa*. Ruší je až
+**Složit znovu od nuly**.
    **Složit znovu od nuly** přepíše celý týden.
 
 **Automat nelosuje — počítá.** Projde místo po místě a u každého zkusí
