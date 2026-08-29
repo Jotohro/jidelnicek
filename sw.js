@@ -1,16 +1,21 @@
-/* Jídelníček — service worker. Zvyš VERSION, když změníš jakýkoliv soubor. */
-const VERSION = "v17";
+/* Jídelníček — service worker.
+ *
+ * Strategie: síť napřed, cache jako záloha.
+ * Když je signál, appka vždycky dostane aktuální soubory a rovnou si je
+ * uloží. Když signál není, jede z uložené kopie. Verzi tady zvyšovat
+ * nemusíš — dělá se to samo. Zvyš ji jen když změníš tenhle soubor.
+ */
+const VERSION = "v18";
 const CACHE = "jidelnicek-" + VERSION;
-const ASSETS = [
-  "./",
-  "./index.html",
-  "./manifest.webmanifest",
-  "./icon-192.png",
-  "./icon-512.png"
-];
+const ASSETS = ["./", "./index.html", "./manifest.webmanifest",
+                "./icon-192.png", "./icon-512.png", "./verze.json"];
 
 self.addEventListener("install", e => {
-  e.waitUntil(caches.open(CACHE).then(c => c.addAll(ASSETS)).then(() => self.skipWaiting()));
+  e.waitUntil(
+    caches.open(CACHE)
+      .then(c => c.addAll(ASSETS).catch(() => {}))
+      .then(() => self.skipWaiting())
+  );
 });
 
 self.addEventListener("activate", e => {
@@ -21,28 +26,44 @@ self.addEventListener("activate", e => {
   );
 });
 
-/* Cache first — appka je statická a musí jet bez signálu.
-   Písma z Google Fonts se doplní do cache při prvním online spuštění. */
-self.addEventListener("fetch", e => {
-  if (e.request.method !== "GET") return;
-  e.respondWith(
-    caches.match(e.request).then(hit => {
-      if (hit) return hit;
-      return fetch(e.request).then(res => {
-        if (res && res.status === 200 && (res.type === "basic" || res.type === "cors")) {
-          const copy = res.clone();
-          caches.open(CACHE).then(c => c.put(e.request, copy));
-        }
-        return res;
-      }).catch(() => caches.match("./index.html"));
-    })
-  );
+self.addEventListener("message", e => {
+  if (e.data === "skipWaiting") self.skipWaiting();
 });
 
-self.addEventListener("notificationclick", e => {
-  e.notification.close();
-  e.waitUntil(clients.matchAll({type:"window"}).then(list => {
-    for (const c of list) if ("focus" in c) return c.focus();
-    if (clients.openWindow) return clients.openWindow("./index.html");
-  }));
+self.addEventListener("fetch", e => {
+  const req = e.request;
+  if (req.method !== "GET") return;
+
+  const url = new URL(req.url);
+  const jeDomaci = url.origin === self.location.origin;
+
+  /* Data z GitHub API se nikdy nekešují — potřebujeme čerstvý stav. */
+  if (url.hostname === "api.github.com") return;
+
+  if (jeDomaci) {
+    /* Síť napřed: online je vždycky aktuální verze, offline se sáhne do cache. */
+    e.respondWith(
+      fetch(req)
+        .then(res => {
+          if (res && res.status === 200) {
+            const kopie = res.clone();
+            caches.open(CACHE).then(c => c.put(req, kopie));
+          }
+          return res;
+        })
+        .catch(() => caches.match(req).then(hit => hit || caches.match("./index.html")))
+    );
+    return;
+  }
+
+  /* Cizí zdroje (písma) — cache napřed, ty se nemění. */
+  e.respondWith(
+    caches.match(req).then(hit => hit || fetch(req).then(res => {
+      if (res && res.status === 200 && (res.type === "basic" || res.type === "cors")) {
+        const kopie = res.clone();
+        caches.open(CACHE).then(c => c.put(req, kopie));
+      }
+      return res;
+    }).catch(() => hit))
+  );
 });

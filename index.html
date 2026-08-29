@@ -52,6 +52,10 @@ button:focus-visible{outline:2px solid var(--beet);outline-offset:2px}
 .weekbar button{background:transparent;border-color:#3c4f49;color:#fff;padding:8px 13px;font-family:var(--mono);font-size:15px}
 
 .weekbar .dnes{font-size:13px;padding:8px 12px}
+.novaverze{display:none;align-items:center;gap:12px;flex-wrap:wrap;margin-top:14px;
+  background:var(--herb);color:#fff;border-radius:var(--r);padding:12px 14px;font-size:14px}
+.novaverze.on{display:flex}
+.novaverze button{background:#fff;color:var(--herb);border-color:#fff;padding:8px 14px;margin-left:auto}
 /* rozcestník */
 .tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(215px,1fr));gap:14px;margin-top:26px}
 .tile{display:flex;flex-direction:column;align-items:flex-start;gap:4px;text-align:left;
@@ -86,8 +90,19 @@ button:focus-visible{outline:2px solid var(--beet);outline-offset:2px}
 .person .big small{font-size:13px;font-weight:400;color:var(--muted);font-family:var(--body)}
 .person .macro{font-family:var(--mono);font-size:12px;color:var(--muted);margin-top:3px}
 .person .rezim{font-size:12px;color:var(--muted);margin-top:8px;border-top:1px dashed var(--line);padding-top:8px}
+.person .krokvyzva{font-size:12px;color:var(--warn);margin-top:6px;border-left:3px solid var(--warn);
+  padding-left:8px;display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.person .krokvyzva span{display:flex;gap:6px;margin-left:auto}
+.person .krokvyzva button{padding:5px 10px;font-size:12px;font-family:var(--mono);font-weight:400}
+.person .krokvyzva button.tise{background:transparent;color:var(--muted);border-color:var(--line)}
+.person .krokinfo{font-family:var(--mono);font-size:11.5px;color:var(--muted);margin-top:6px}
+.person .krokinfo b{color:var(--ink)}
+.rezim-select{max-width:130px;font-size:13px;padding:7px 6px}
+.person .hubnu{font-family:var(--mono);font-size:11.5px;color:var(--ink);margin-top:6px;line-height:1.6}
+.person .podlaha{font-size:12px;color:var(--warn);margin-top:6px;border-left:3px solid var(--warn);padding-left:8px}
 .person .wrow{display:flex;gap:6px;margin-top:10px}
 .person .wrow input{padding:7px 8px;font-size:14px;min-width:0}
+.person .wrow input[id^="kroky-"]{max-width:96px}
 .person .wrow input:disabled{background:#f2f5f2;color:var(--muted)}
 .prepinac{font-family:var(--mono);font-size:11px;letter-spacing:.06em;text-transform:uppercase;
   font-weight:400;background:transparent;color:var(--muted);border-color:var(--line);white-space:nowrap}
@@ -122,6 +137,8 @@ button:focus-visible{outline:2px solid var(--beet);outline-offset:2px}
 .day-date{font-family:var(--mono);font-size:12px;color:var(--muted)}
 .day-nums{font-family:var(--mono);font-size:11px;color:var(--muted);margin-left:auto;text-align:right}
 .day-nums b{color:var(--ink)}
+.day-nums .mimo{color:var(--heavy);font-weight:700}
+.day-nums .nadpasmo{color:var(--amber)}
 .meal{padding-top:10px;border-top:1px dashed var(--line)}
 .meal:first-of-type{border-top:0;padding-top:0}
 .mtop{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap}
@@ -138,6 +155,13 @@ button:focus-visible{outline:2px solid var(--beet);outline-offset:2px}
 .sl-polevka{background:#8a7f6e}
 .sl-obed{background:var(--beet)} .sl-odpol{background:#b98fa4}
 .sl-vecere{background:var(--herb)} .sl-druha{background:#96b3a1}
+.prumtab{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:20px}
+.prumos h4{font-family:var(--display);font-size:16px;margin:0 0 8px;padding-bottom:6px;border-bottom:1px solid var(--line)}
+.mrad{display:flex;align-items:baseline;gap:8px;font-size:14px;padding:3px 0}
+.mrad span{flex:1;color:var(--muted)}
+.mrad b{font-family:var(--mono);font-weight:700}
+.mrad b.ok{color:var(--herb)} .mrad b.pod{color:var(--heavy)} .mrad b.nad{color:var(--amber)}
+.mrad i{font-family:var(--mono);font-style:normal;font-size:11.5px;color:var(--muted);min-width:64px;text-align:right}
 /* vaření a nákup */
 .cook{border-left:3px solid var(--beet);padding-left:13px;margin-bottom:16px}
 .cook:last-child{margin-bottom:0}
@@ -193,6 +217,10 @@ footer{margin-top:42px;padding-top:16px;border-top:1px solid var(--line);font-si
     <button id="wtoday" class="dnes">dnešní</button>
   </div>
   <div class="callout" id="callout"><p id="calloutText"></p></div>
+  <div class="novaverze" id="novaVerze">
+    <span id="novaVerzeText">Je k dispozici novější verze appky.</span>
+    <button id="nactiVerzi">Načíst</button>
+  </div>
 </header>
 
 <!-- ROZCESTNÍK -->
@@ -228,6 +256,7 @@ footer{margin-top:42px;padding-top:16px;border-top:1px solid var(--line);font-si
   <button class="zpet" data-zpet>← Zpět na rozcestník</button>
   <section>
     <div class="sec-head"><h2>Týden</h2><span class="hint">gramáže jsou pro každého zvlášť</span></div>
+    <div class="card" id="prumery" style="margin-bottom:14px"></div>
     <div id="week"></div>
   </section>
   <section>
@@ -316,83 +345,83 @@ footer{margin-top:42px;padding-top:16px;border-top:1px solid var(--line);font-si
 
 <script>
 const ING={
- chleb:{n:"Chleba",k:245,p:7,c:45,f:1.2,cat:"pecivo"},
- toast:{n:"Toastový chléb",k:265,p:8,c:48,f:3.5,cat:"pecivo",step:25},
- rohlik:{n:"Rohlík",k:290,p:9,c:56,f:3,cat:"pecivo",step:42},
- knacke:{n:"Knäckebrot",k:340,p:10,c:65,f:2,cat:"pecivo",step:10},
- sunka:{n:"Kuřecí šunka",k:105,p:18,c:1,f:3,cat:"maso",step:12},
- vejce:{n:"Vejce",k:143,p:12.6,c:0.7,f:9.5,cat:"mleko",step:55},
- pomaz:{n:"Pomazánkové máslo",k:250,p:6,c:4,f:24,cat:"mleko",step:25},
- smetanito:{n:"Smetanito",k:230,p:9,c:6,f:20,cat:"mleko",step:10,lock:true},
- platkovy:{n:"Plátkový sýr",k:290,p:24,c:1,f:22,cat:"mleko",step:25},
- zeletava:{n:"Tavený sýr",k:265,p:10,c:4,f:24,cat:"mleko",step:25},
- maslo:{n:"Máslo",k:717,p:0.9,c:0.6,f:81,cat:"mleko",lock:true},
- marmelada:{n:"Meruňková marmeláda",k:240,p:0.4,c:58,f:0,cat:"spiz",lock:true},
- mleko:{n:"Mléko plnotučné",k:64,p:3.3,c:4.7,f:3.5,cat:"mleko",step:50},
- protein:{n:"Proteinový prášek",k:380,p:78,c:6,f:5,cat:"spiz",step:28},
- puding:{n:"Proteinový puding",k:80,p:10,c:5.5,f:1.5,cat:"mleko",step:200},
- riomare:{n:"Salát s tuňákem a kuskusem",k:155,p:10,c:16,f:5,cat:"spiz",step:160},
- kure:{n:"Kuřecí prsa",k:110,p:23,c:0,f:1.5,cat:"maso"},
- veprove:{n:"Vepřové ve vlastní šťávě",k:170,p:16,c:0.5,f:12,cat:"maso",step:180},
- hovezi:{n:"Mleté hovězí",k:176,p:20,c:0,f:10,cat:"maso"},
- losos:{n:"Losos",k:208,p:20,c:0,f:13,cat:"maso"},
- tunak:{n:"Tuňák ve vlastní šťávě",k:116,p:26,c:0,f:1,cat:"maso",step:80},
- ryze:{n:"Rýže (syrová)",k:352,p:7.5,c:77,f:1,cat:"priloha"},
- testoviny:{n:"Těstoviny (syrové)",k:355,p:12.5,c:71,f:1.5,cat:"priloha"},
- nudle:{n:"Čínské nudle (syrové)",k:350,p:11,c:70,f:2,cat:"priloha"},
- kuskus:{n:"Kuskus (syrový)",k:376,p:13,c:72,f:1,cat:"priloha"},
- pohanka:{n:"Pohanka (syrová)",k:343,p:13,c:62,f:3.4,cat:"priloha"},
- brambory:{n:"Brambory",k:77,p:2,c:17,f:0.1,cat:"priloha"},
- noky:{n:"Noky",k:175,p:4,c:36,f:0.5,cat:"priloha",step:50},
- smes:{n:"Zeleninová směs s brokolicí",k:35,p:2.5,c:4,f:0.4,cat:"zelenina",step:350},
- brokolice:{n:"Brokolice",k:34,p:2.8,c:4,f:0.4,cat:"zelenina",step:50},
- hrasek:{n:"Hrášek v nálevu",k:78,p:5,c:11,f:0.5,cat:"zelenina",step:130},
- fazolky:{n:"Fazolky",k:31,p:1.8,c:5,f:0.1,cat:"zelenina",step:100},
- cuketa:{n:"Cuketa",k:17,p:1.2,c:2,f:0.3,cat:"zelenina"},
- spenat:{n:"Listový špenát",k:23,p:2.9,c:1.5,f:0.4,cat:"zelenina",step:100},
- salat:{n:"Listový salát",k:20,p:1.5,c:2,f:0.3,cat:"zelenina",step:125},
- ledovy:{n:"Ledový salát",k:14,p:0.9,c:2,f:0.1,cat:"zelenina",step:10},
- okurka:{n:"Okurka salátová",k:15,p:0.7,c:3,f:0.1,cat:"zelenina"},
- rajce:{n:"Rajčata",k:18,p:0.9,c:3.5,f:0.2,cat:"zelenina"},
- cherry:{n:"Cherry rajčata",k:20,p:0.9,c:3.5,f:0.2,cat:"zelenina",step:10},
- mrkev:{n:"Mrkev",k:41,p:0.9,c:8,f:0.2,cat:"zelenina"},
- cibule:{n:"Cibule",k:40,p:1.1,c:8,f:0.1,cat:"zelenina"},
- zampiony:{n:"Žampiony",k:22,p:3,c:1,f:0.3,cat:"zelenina"},
- protlak:{n:"Rajčatový protlak",k:82,p:4,c:12,f:0.5,cat:"spiz",lock:true},
- cesnek:{n:"Česnek",k:149,p:6,c:33,f:0.5,cat:"zelenina",lock:true},
- cibulka:{n:"Jarní cibulka",k:32,p:1.8,c:4,f:0.2,cat:"zelenina",lock:true},
- banan:{n:"Banán",k:89,p:1.1,c:22,f:0.3,cat:"ovoce",step:110},
- jablko:{n:"Jablko",k:52,p:0.3,c:13,f:0.2,cat:"ovoce",step:150},
- hruska:{n:"Hruška",k:57,p:0.4,c:13,f:0.1,cat:"ovoce",step:150},
- pomeranc:{n:"Pomeranč",k:47,p:0.9,c:11,f:0.1,cat:"ovoce",step:150},
- maliny:{n:"Maliny",k:52,p:1.2,c:9,f:0.6,cat:"ovoce",step:25},
- reckyjog:{n:"Řecký jogurt bílý",k:100,p:9,c:4,f:5,cat:"mleko",step:140},
- mozzarella:{n:"Mozzarella",k:250,p:18,c:1,f:20,cat:"mleko",step:25},
- balkan:{n:"Balkánský sýr",k:260,p:17,c:1,f:21,cat:"mleko",step:25},
- hermelin:{n:"Hermelín",k:300,p:18,c:1,f:25,cat:"mleko",step:100},
- orechy:{n:"Vlašské ořechy",k:654,p:15,c:7,f:65,cat:"spiz",step:10},
- olej:{n:"Olivový olej",k:884,p:0,c:0,f:100,cat:"spiz",lock:true},
- pesto:{n:"Bazalkové pesto",k:460,p:5,c:6,f:45,cat:"spiz",step:10},
- bolognese:{n:"Hotová bolognese",k:90,p:5,c:8,f:4,cat:"spiz",step:180},
- syromacka:{n:"Sýrová omáčka",k:60,p:2,c:6,f:3,cat:"spiz",step:105,lock:true},
- maggi:{n:"Hotová omáčka Fusian",k:110,p:2,c:14,f:5,cat:"spiz",step:118,lock:true},
- bazalka:{n:"Bazalka čerstvá",k:23,p:3,c:1,f:0.6,cat:"spiz",lock:true},
- hovezizadni:{n:"Hovězí zadní",k:130,p:21,c:0,f:5,cat:"maso"},
- kachna:{n:"Kachní stehno",k:300,p:17,c:0,f:25,cat:"maso"},
- celer:{n:"Celer",k:42,p:1.5,c:9,f:0.3,cat:"zelenina"},
- petrzel:{n:"Petržel (kořen)",k:36,p:2.5,c:6,f:0.6,cat:"zelenina"},
- kysanezeli:{n:"Kysané zelí",k:20,p:1,c:3,f:0.2,cat:"zelenina"},
- smetana:{n:"Smetana ke šlehání",k:292,p:2,c:3,f:31,cat:"mleko"},
- knedlik:{n:"Houskový knedlík",k:260,p:8,c:48,f:3,cat:"priloha"},
- bramknedlik:{n:"Bramborový knedlík",k:170,p:3,c:36,f:1,cat:"priloha"},
- strouhanka:{n:"Strouhanka",k:350,p:12,c:70,f:2,cat:"priloha"},
- mouka:{n:"Hladká mouka",k:340,p:10,c:72,f:1,cat:"priloha"},
- nudlicky:{n:"Polévkové nudle",k:355,p:12,c:71,f:1.5,cat:"priloha"},
- vyvar:{n:"Kuřecí vývar",k:8,p:1,c:0.5,f:0.3,cat:"spiz",lock:true},
- brusinky:{n:"Brusinky",k:200,p:0.2,c:50,f:0.2,cat:"spiz",lock:true},
- horcice:{n:"Hořčice",k:66,p:4,c:6,f:3,cat:"spiz",lock:true},
- paprikamleta:{n:"Mletá paprika",k:282,p:14,c:54,f:13,cat:"spiz",lock:true},
- skorice:{n:"Skořice",k:247,p:4,c:27,f:1.2,cat:"spiz",lock:true}
+ chleb:{n:"Chleba",k:245,p:7,c:45,f:1.2,vl:6,cat:"pecivo"},
+ toast:{n:"Toastový chléb",k:265,p:8,c:48,f:3.5,vl:3,cat:"pecivo",step:25},
+ rohlik:{n:"Rohlík",k:290,p:9,c:56,f:3,vl:2.5,cat:"pecivo",step:42},
+ knacke:{n:"Knäckebrot",k:340,p:10,c:65,f:2,vl:16,cat:"pecivo",step:10},
+ sunka:{n:"Kuřecí šunka",k:105,p:18,c:1,f:3,vl:0,cat:"maso",step:12},
+ vejce:{n:"Vejce",k:143,p:12.6,c:0.7,f:9.5,vl:0,cat:"mleko",step:55},
+ pomaz:{n:"Pomazánkové máslo",k:250,p:6,c:4,f:24,vl:0,cat:"mleko",step:25},
+ smetanito:{n:"Smetanito",k:230,p:9,c:6,f:20,vl:0,cat:"mleko",step:10,lock:true},
+ platkovy:{n:"Plátkový sýr",k:290,p:24,c:1,f:22,vl:0,cat:"mleko",step:25},
+ zeletava:{n:"Tavený sýr",k:265,p:10,c:4,f:24,vl:0,cat:"mleko",step:25},
+ maslo:{n:"Máslo",k:717,p:0.9,c:0.6,f:81,vl:0,cat:"mleko",lock:true},
+ marmelada:{n:"Meruňková marmeláda",k:240,p:0.4,c:58,f:0,vl:1,cat:"spiz",lock:true},
+ mleko:{n:"Mléko plnotučné",k:64,p:3.3,c:4.7,f:3.5,vl:0,cat:"mleko",step:50},
+ protein:{n:"Proteinový prášek",k:380,p:78,c:6,f:5,vl:1,cat:"spiz",step:28},
+ puding:{n:"Proteinový puding",k:80,p:10,c:5.5,f:1.5,vl:0.5,cat:"mleko",step:200},
+ riomare:{n:"Salát s tuňákem a kuskusem",k:155,p:10,c:16,f:5,vl:2,cat:"spiz",step:160},
+ kure:{n:"Kuřecí prsa",k:110,p:23,c:0,f:1.5,vl:0,cat:"maso"},
+ veprove:{n:"Vepřové ve vlastní šťávě",k:170,p:16,c:0.5,f:12,vl:0,cat:"maso",step:180},
+ hovezi:{n:"Mleté hovězí",k:176,p:20,c:0,f:10,vl:0,cat:"maso"},
+ losos:{n:"Losos",k:208,p:20,c:0,f:13,vl:0,cat:"maso"},
+ tunak:{n:"Tuňák ve vlastní šťávě",k:116,p:26,c:0,f:1,vl:0,cat:"maso",step:80},
+ ryze:{n:"Rýže (syrová)",k:352,p:7.5,c:77,f:1,vl:1.3,cat:"priloha"},
+ testoviny:{n:"Těstoviny (syrové)",k:355,p:12.5,c:71,f:1.5,vl:3,cat:"priloha"},
+ nudle:{n:"Čínské nudle (syrové)",k:350,p:11,c:70,f:2,vl:2,cat:"priloha"},
+ kuskus:{n:"Kuskus (syrový)",k:376,p:13,c:72,f:1,vl:5,cat:"priloha"},
+ pohanka:{n:"Pohanka (syrová)",k:343,p:13,c:62,f:3.4,vl:10,cat:"priloha"},
+ brambory:{n:"Brambory",k:77,p:2,c:17,f:0.1,vl:2.2,cat:"priloha"},
+ noky:{n:"Noky",k:175,p:4,c:36,f:0.5,vl:2,cat:"priloha",step:50},
+ smes:{n:"Zeleninová směs s brokolicí",k:35,p:2.5,c:4,f:0.4,vl:2.5,cat:"zelenina",step:350},
+ brokolice:{n:"Brokolice",k:34,p:2.8,c:4,f:0.4,vl:2.6,cat:"zelenina",step:50},
+ hrasek:{n:"Hrášek v nálevu",k:78,p:5,c:11,f:0.5,vl:5,cat:"zelenina",step:130},
+ fazolky:{n:"Fazolky",k:31,p:1.8,c:5,f:0.1,vl:3,cat:"zelenina",step:100},
+ cuketa:{n:"Cuketa",k:17,p:1.2,c:2,f:0.3,vl:1,cat:"zelenina"},
+ spenat:{n:"Listový špenát",k:23,p:2.9,c:1.5,f:0.4,vl:2.2,cat:"zelenina",step:100},
+ salat:{n:"Listový salát",k:20,p:1.5,c:2,f:0.3,vl:1.3,cat:"zelenina",step:125},
+ ledovy:{n:"Ledový salát",k:14,p:0.9,c:2,f:0.1,vl:1,cat:"zelenina",step:10},
+ okurka:{n:"Okurka salátová",k:15,p:0.7,c:3,f:0.1,vl:0.5,cat:"zelenina"},
+ rajce:{n:"Rajčata",k:18,p:0.9,c:3.5,f:0.2,vl:1.2,cat:"zelenina"},
+ cherry:{n:"Cherry rajčata",k:20,p:0.9,c:3.5,f:0.2,vl:1.2,cat:"zelenina",step:10},
+ mrkev:{n:"Mrkev",k:41,p:0.9,c:8,f:0.2,vl:2.8,cat:"zelenina"},
+ cibule:{n:"Cibule",k:40,p:1.1,c:8,f:0.1,vl:1.7,cat:"zelenina"},
+ zampiony:{n:"Žampiony",k:22,p:3,c:1,f:0.3,vl:1,cat:"zelenina"},
+ protlak:{n:"Rajčatový protlak",k:82,p:4,c:12,f:0.5,vl:3,cat:"spiz",lock:true},
+ cesnek:{n:"Česnek",k:149,p:6,c:33,f:0.5,vl:2.1,cat:"zelenina",lock:true},
+ cibulka:{n:"Jarní cibulka",k:32,p:1.8,c:4,f:0.2,vl:1.8,cat:"zelenina",lock:true},
+ banan:{n:"Banán",k:89,p:1.1,c:22,f:0.3,vl:2.6,cat:"ovoce",step:110},
+ jablko:{n:"Jablko",k:52,p:0.3,c:13,f:0.2,vl:2.4,cat:"ovoce",step:150},
+ hruska:{n:"Hruška",k:57,p:0.4,c:13,f:0.1,vl:3.1,cat:"ovoce",step:150},
+ pomeranc:{n:"Pomeranč",k:47,p:0.9,c:11,f:0.1,vl:2.4,cat:"ovoce",step:150},
+ maliny:{n:"Maliny",k:52,p:1.2,c:9,f:0.6,vl:6.5,cat:"ovoce",step:25},
+ reckyjog:{n:"Řecký jogurt bílý",k:100,p:9,c:4,f:5,vl:0,cat:"mleko",step:140},
+ mozzarella:{n:"Mozzarella",k:250,p:18,c:1,f:20,vl:0,cat:"mleko",step:25},
+ balkan:{n:"Balkánský sýr",k:260,p:17,c:1,f:21,vl:0,cat:"mleko",step:25},
+ hermelin:{n:"Hermelín",k:300,p:18,c:1,f:25,vl:0,cat:"mleko",step:50},
+ orechy:{n:"Vlašské ořechy",k:654,p:15,c:7,f:65,vl:6.7,cat:"spiz",step:10},
+ olej:{n:"Olivový olej",k:884,p:0,c:0,f:100,vl:0,cat:"spiz",lock:true},
+ pesto:{n:"Bazalkové pesto",k:460,p:5,c:6,f:45,vl:2,cat:"spiz",step:10},
+ bolognese:{n:"Hotová bolognese",k:90,p:5,c:8,f:4,vl:1.5,cat:"spiz",step:180},
+ syromacka:{n:"Sýrová omáčka",k:60,p:2,c:6,f:3,vl:0.5,cat:"spiz",step:105,lock:true},
+ maggi:{n:"Hotová omáčka Fusian",k:110,p:2,c:14,f:5,vl:1,cat:"spiz",step:118,lock:true},
+ bazalka:{n:"Bazalka čerstvá",k:23,p:3,c:1,f:0.6,vl:1.6,cat:"spiz",lock:true},
+ hovezizadni:{n:"Hovězí zadní",k:130,p:21,c:0,f:5,vl:0,cat:"maso"},
+ kachna:{n:"Kachní stehno",k:300,p:17,c:0,f:25,vl:0,cat:"maso"},
+ celer:{n:"Celer",k:42,p:1.5,c:9,f:0.3,vl:1.8,cat:"zelenina"},
+ petrzel:{n:"Petržel (kořen)",k:36,p:2.5,c:6,f:0.6,vl:4.9,cat:"zelenina"},
+ kysanezeli:{n:"Kysané zelí",k:20,p:1,c:3,f:0.2,vl:2.1,cat:"zelenina"},
+ smetana:{n:"Smetana ke šlehání",k:292,p:2,c:3,f:31,vl:0,cat:"mleko"},
+ knedlik:{n:"Houskový knedlík",k:260,p:8,c:48,f:3,vl:2,cat:"priloha"},
+ bramknedlik:{n:"Bramborový knedlík",k:170,p:3,c:36,f:1,vl:2,cat:"priloha"},
+ strouhanka:{n:"Strouhanka",k:350,p:12,c:70,f:2,vl:4,cat:"priloha"},
+ mouka:{n:"Hladká mouka",k:340,p:10,c:72,f:1,vl:2.7,cat:"priloha"},
+ nudlicky:{n:"Polévkové nudle",k:355,p:12,c:71,f:1.5,vl:3,cat:"priloha"},
+ vyvar:{n:"Kuřecí vývar",k:8,p:1,c:0.5,f:0.3,vl:0,cat:"spiz",lock:true},
+ brusinky:{n:"Brusinky",k:200,p:0.2,c:50,f:0.2,vl:3.6,cat:"spiz",lock:true},
+ horcice:{n:"Hořčice",k:66,p:4,c:6,f:3,vl:3,cat:"spiz",lock:true},
+ paprikamleta:{n:"Mletá paprika",k:282,p:14,c:54,f:13,vl:35,cat:"spiz",lock:true},
+ skorice:{n:"Skořice",k:247,p:4,c:27,f:1.2,vl:53,cat:"spiz",lock:true}
 };
 const REC=[
  {id:"s1",slot:"snidane",n:"Vejce, chleba, šunka",i:[["vejce",165],["chleb",100],["sunka",48],["maslo",10]]},
@@ -506,7 +535,7 @@ const dmt=iso=>{const d=new Date(iso);return d.getDate()+". "+(d.getMonth()+1)+"
 
 /* ============ pomocné ============ */
 function rng(seed){return function(){seed|=0;seed=seed+0x6D2B79F5|0;let t=Math.imul(seed^seed>>>15,1|seed);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
-function macros(a){let m={k:0,p:0,c:0,f:0};for(const key in a){const g=a[key],x=ING[key];m.k+=x.k*g/100;m.p+=x.p*g/100;m.c+=x.c*g/100;m.f+=x.f*g/100}return m}
+function macros(a){let m={k:0,p:0,c:0,f:0,vl:0};for(const key in a){const g=a[key],x=ING[key];m.k+=x.k*g/100;m.p+=x.p*g/100;m.c+=x.c*g/100;m.f+=x.f*g/100;m.vl+=(x.vl||0)*g/100}return m}
 function roundAmt(key,g){const x=ING[key];if(x.step)return Math.max(x.step,Math.round(g/x.step)*x.step);return Math.max(5,Math.round(g/5)*5)}
 function scaleRec(rec,f,bezBaleni){
   /* vaří se rovnou na víc porcí — jednotlivá porce se na balení
@@ -541,6 +570,23 @@ function nabidka(slot){
 /* ============ cíle ============ */
 function vahaOsoby(o){const db=DB.read();return db.kg[o.id]||o.kg}
 function vlastniKcal(o){const db=DB.read();return (db.kcalRucne||{})[o.id]||null}
+function krokyOsoby(o){const db=DB.read();return (db.kroky||{})[o.id]||10000}
+function palZKroku(kroku){return Math.min(1.9,1.2+Math.max(0,kroku-4000)*0.0000583)}
+const KROKY_MIN=4000;
+function krokZaznam(o){
+  const db=DB.read(), z=(db.kroky||{})[o.id];
+  return Object.assign({kroky:KROKY_MIN,od:dnes()},z||{});
+}
+function krokyOsoby(o){return Math.max(KROKY_MIN,krokZaznam(o).kroky)}
+/* Jednou za dva týdny se zeptáme, jestli už to nechce přidat. */
+function krokyKeKontrole(o){return rozdilDnu(krokZaznam(o).od,dnes())>=14}
+function ulozKroky(id,kroku){
+  if(!(kroku>=KROKY_MIN&&kroku<=40000))return false;
+  const db=DB.read();db.kroky=db.kroky||{};
+  db.kroky[id]={kroky:kroku,od:dnes()};
+  DB.save();oznacZmenu();return true;
+}
+function rezimPrijmu(o){return (DB.read().rezim||{})[o.id]||"zaklad"}
 function vekOsoby(o){
   const d=new Date(o.nar), t=new Date();
   let v=t.getFullYear()-d.getFullYear();
@@ -562,9 +608,19 @@ function cile(o){
     kcal=Math.round(JOZA_PODIL*vzor.kcal);
     auto=true;
     pozn=`${Math.round(JOZA_PODIL*100)} % toho, co má ${osoba(REFERENCNI).jmeno}`;
-  }else if(!auto&&vlastniKcal(o)){
-    kcal=vlastniKcal(o);
+  }else if(rezimPrijmu(o)==="rucne"&&vlastniKcal(o)){
+    kcal=vlastniKcal(o);auto=false;
     pozn="zadáno ručně";
+  }else if(rezimPrijmu(o)==="kroky"){
+    const kroku=krokyOsoby(o), vydej=bmrOsoby(o,kg)*palZKroku(kroku);
+    const tempo=0.006;                       /* cílové tempo 0,6 % váhy týdně */
+    const zTempa=vydej-tempo*kg*7700/7;
+    const strop=vydej*0.80;                  /* deficit nikdy víc než pětina výdeje */
+    kcal=Math.round(Math.max(zTempa,strop)/10)*10;
+    auto=true;
+    pozn=zTempa<strop
+      ? `z ${cz(kroku)} kroků — výdej ${cz(Math.round(vydej))} kcal, ubíráme pětinu (víc by na tenhle počet kroků bylo moc)`
+      : `z ${cz(kroku)} kroků — výdej ${cz(Math.round(vydej))} kcal, tempo 0,6 % váhy týdně`;
   }else{
     kcal=Math.round(koeficient(o)*bmrOsoby(o,kg));
     auto=true;
@@ -573,12 +629,24 @@ function cile(o){
       : `dopočítáno z váhy — základ ${o.kotva.kg} kg = ${cz(o.kotva.kcal)} kcal`;
   }
 
-  /* bílkoviny z referenční váhy (nejvýš ta odpovídající BMI 25) */
+  /* Pásma, ne jedno číslo. Spodní hranice je ta, pod kterou se nesmí —
+     tělo z toho staví a spravuje. Horní drží den v rovnováze. */
   const ref=Math.min(kg,25*(o.cm/100)*(o.cm/100));
-  const p=Math.round(1.8*ref);
-  const f=Math.max(Math.round(0.7*ref),Math.round(kcal*0.28/9));
+  const p=Math.round(1.8*ref), pMin=Math.round(1.6*ref), pMax=Math.round(2.2*ref);
+  const fMin=Math.max(Math.round(0.8*ref),Math.round(kcal*0.22/9));
+  const f=Math.max(fMin,Math.round(kcal*0.28/9));
+  const fMax=Math.round(kcal*0.35/9);
+  const vlMin=Math.max(25,Math.round(14*kcal/1000));
+  const vl=Math.max(vlMin,Math.round(16*kcal/1000));
+  const vlMax=Math.min(50,Math.round(24*kcal/1000));
+  const podlaha=Math.round(pMin*4+fMin*9+Math.max(130,2*ref)*4);
+  if(kcal<podlaha&&rezimPrijmu(o)==="kroky"){
+    kcal=podlaha;
+    pozn=`z kroků by vyšlo míň, než se dá slušně najíst — držíme podlahu ${cz(podlaha)} kcal`;
+  }
   const c=Math.round((kcal-p*4-f*9)/4);
-  return{kg,vek,kcal,p,c,f,pozn,auto,naKilo:o.kotva?Math.round(koeficient(o)*10):null};
+  const cMin=Math.max(130,Math.round(2*ref));   /* pod tímhle už mozek a zásoby glykogenu strádají */
+  return{kg,vek,kcal,p,pMin,pMax,c,cMin,f,fMin,fMax,vl,vlMin,vlMax,pozn,auto,naKilo:o.kotva?Math.round(koeficient(o)*10):null};
 }
 
 /* ============ plán týdne ============ */
@@ -593,43 +661,113 @@ function planTydne(iso){
   if(!p.polevky)p.polevky=[null,null,null,null];
   return p;
 }
+/* Kolik ten den chybí do zdravého dne. Nula je ideál.
+   Trochu navíc se toleruje víc než nedostatek — plán, ze kterého má člověk
+   hlad, stejně nevydrží. */
+/* Pásmo: pod spodní hranicí trestat tvrdě, nad horní mírně, uvnitř nula. */
+function mimoPasmo(hod,min,max,vahaDol,vahaNahoru){
+  if(hod<min)return (min-hod)/min*vahaDol;
+  if(hod>max)return (hod-max)/max*vahaNahoru;
+  return 0;
+}
+function pokuta(s,cil){
+  let x=0;
+  const d=(s.k-cil.kcal)/cil.kcal;
+  if(d>0.08)x+=(d-0.08)*8;          /* přejedení */
+  if(d<-0.05)x+=(-d-0.05)*14;       /* nedojedení bolí víc */
+  x+=mimoPasmo(s.p, cil.pMin, cil.pMax, 14, 3);
+  x+=mimoPasmo(s.f, cil.fMin, cil.fMax, 12, 3);
+  x+=mimoPasmo(s.vl,cil.vlMin,cil.vlMax, 8, 2.5);
+  if(s.c<cil.cMin)x+=(cil.cMin-s.c)/cil.cMin*4;
+  return x;
+}
+function ohodnotDny(dny,p,hrnce,polevky,tg){
+  let x=0;
+  dny.forEach(d=>{
+    const jidla=sestavDen(d,p,hrnce,polevky,tg);
+    LIDE.filter(o=>o.cely).forEach(o=>{x+=pokuta(souhrnDne(jidla,o.id),tg[o.id])});
+  });
+  return x;
+}
+
 function doplnPlan(iso,odznova){
-  const p=planTydne(iso);
+  const p=planTydne(iso), tg=cilePro();
   const rand=rng(odznova?Date.now()%99991:iso.split("-").join("")%99991+7);
-  const vyber=(slot,vyhni)=>{
-    let pool=nabidka(slot).filter(r=>!vyhni.includes(r.id)&&!r.rare);
-    if(!pool.length)pool=nabidka(slot).filter(r=>!r.rare);
-    if(!pool.length)pool=nabidka(slot);
-    /* automat sahá po bílkovinnějších variantách — rohlík s marmeládou si
-       člověk může vybrat ručně, ale sám se nenabídne */
-    const hust=r=>{const m=macros(scaleRec(r,1));return m.p/Math.max(m.k,1)};
-    const set=pool.slice().sort((a,b)=>hust(b)-hust(a));
-    const lepsi=set.slice(0,Math.max(3,Math.ceil(set.length*0.6)));
-    return lepsi[Math.floor(rand()*lepsi.length)].id;
-  };
+  const nahodne=pole=>pole[Math.floor(rand()*pole.length)];
+
+  /* 1. nasadit něco do prázdných míst, ať je z čeho vycházet */
   PAIRS.forEach((_,i)=>{
-    if(odznova||!p.hrnce[i]){
-      const jine=p.hrnce.filter((x,j)=>j!==i);
-      p.hrnce[i]=vyber("obed",jine.filter(Boolean));
-    }
-    if(!jeVikend(i)){p.polevky[i]=null}
+    if(odznova||!p.hrnce[i])p.hrnce[i]=nahodne(nabidka("obed").filter(r=>!r.rare)).id;
+    if(!jeVikend(i))p.polevky[i]=null;
     else if(odznova||!p.polevky[i]){
-      p.polevky[i]=nabidka("polevka").length?vyber("polevka",[]):null;
+      const pol=nabidka("polevka");
+      p.polevky[i]=pol.length?nahodne(pol).id:null;
     }
   });
-  p.dny.forEach((den,d)=>{
-    VOLNE.forEach(slot=>{
-      if(odznova||!den[slot]){
-        const sousedi=[d-1,d+1].map(i=>p.dny[i]&&p.dny[i][slot]).filter(Boolean);
-        den[slot]=vyber(slot,sousedi);
-      }
-    });
+  p.dny.forEach((den,d)=>VOLNE.forEach(slot=>{
+    if(odznova||!den[slot])den[slot]=nahodne(nabidka(slot)).id;
+  }));
+
+  /* 2. procházet po jednom místě a zkoušet, co dá nejzdravější dny.
+        Měněná jsou jen ta místa, která se doplňovala. */
+  const menitelne=[];
+  PAIRS.forEach((par,i)=>{
+    if(odznova||!p.hrnce[i]||true)menitelne.push({typ:"hrnec",i,dny:par});
+    if(jeVikend(i)&&p.polevky[i])menitelne.push({typ:"polevka",i,dny:par});
   });
+  p.dny.forEach((den,d)=>VOLNE.forEach(slot=>menitelne.push({typ:"volne",d,slot,dny:[d]})));
+
+  const zkus=(misto,idFn)=>{
+    let kandidati=misto.typ==="hrnec"?nabidka("obed").filter(r=>!r.rare)
+                 :misto.typ==="polevka"?nabidka("polevka")
+                 :nabidka(misto.slot);
+    if(misto.typ==="hrnec"){
+      /* dvakrát po sobě stejné hlavní jídlo je otrava — vyřadit sousední várky */
+      const sousedi=[p.hrnce[misto.i-1],p.hrnce[misto.i+1]].filter(Boolean);
+      const bez=kandidati.filter(r=>!sousedi.includes(r.id));
+      if(bez.length>=2)kandidati=bez;
+    }
+    if(kandidati.length<2)return;
+    let nej=null;
+    kandidati.forEach(r=>{
+      idFn(r.id);
+      const {hrnce,polevky}=hrnceZPlanu(p,tg);
+      const skore=ohodnotDny(misto.dny,p,hrnce,polevky,tg);
+      if(!nej||skore<nej.skore-1e-9)nej={id:r.id,skore};
+      else if(Math.abs(skore-nej.skore)<0.15&&rand()<0.35)nej={id:r.id,skore};  /* ať to není každý týden stejné */
+    });
+    idFn(nej.id);
+  };
+  for(let kolo=0;kolo<2;kolo++){
+    menitelne.forEach(m=>{
+      if(m.typ==="hrnec")zkus(m,id=>p.hrnce[m.i]=id);
+      else if(m.typ==="polevka")zkus(m,id=>p.polevky[m.i]=id);
+      else zkus(m,id=>p.dny[m.d][m.slot]=id);
+    });
+  }
+
+  /* 3. dvakrát po sobě totéž jídlo je nuda — když je náhrada skoro stejně dobrá, vyměnit */
+  p.dny.forEach((den,d)=>VOLNE.forEach(slot=>{
+    const pred=d>0?p.dny[d-1][slot]:null;
+    if(pred!==den[slot])return;
+    const jine=nabidka(slot).filter(r=>r.id!==pred);
+    if(!jine.length)return;
+    const puvodni=den[slot];
+    const {hrnce,polevky}=hrnceZPlanu(p,tg);
+    const zaklad=ohodnotDny([d],p,hrnce,polevky,tg);
+    let nej=null;
+    jine.forEach(r=>{
+      den[slot]=r.id;
+      const skore=ohodnotDny([d],p,hrnce,polevky,tg);
+      if(!nej||skore<nej.skore)nej={id:r.id,skore};
+    });
+    den[slot]=(nej&&nej.skore<zaklad+0.5)?nej.id:puvodni;
+  }));
+
   DB.save();
   return p;
 }
 
-/* ============ dopočet porcí ============ */
 function dolad(volna,zbyva,tg){
   /* 1. fáze — rozpustit zbývající kalorie mezi volná jídla podle jejich podílu */
   const sumaPodilu=volna.reduce((x,m)=>x+SHARES[m.slot],0)||1;
@@ -638,15 +776,16 @@ function dolad(volna,zbyva,tg){
     
     const zaklad=macros(scaleRec(m.rec,1)).k;
     if(zaklad<=0)return;
-    const g=Math.min(1.7,Math.max(0.3,cil/zaklad));
+    const g=Math.min(1.7,Math.max(0.45,cil/zaklad));
     Object.assign(m.a,scaleRec(m.rec,g));
     m.z=Object.assign({},m.a);      /* od téhle porce se odvíjejí meze dolaďování */
   });
   /* 2. fáze — dorovnat bílkoviny tak, aby kalorie zůstaly, kde jsou */
   const soucet=()=>{const a={};volna.forEach(m=>{for(const k in m.a)a[k]=(a[k]||0)+m.a[k]});return macros(a)};
   for(let it=0;it<40;it++){
-    const t=soucet(), chybi=tg.p-(t.p+tg.pHrnec);
-    if(Math.abs(chybi)<=5)break;
+    const t=soucet(), vse=t.p+(tg.pHrnec||0), chybi=tg.p-vse;
+    if(vse>=tg.pMin&&vse<=tg.pMax&&Math.abs(chybi)<=12)break;
+    if(Math.abs(chybi)<=4)break;
     let zdroj=null;
     volna.forEach(m=>Object.keys(m.a).forEach(key=>{
       const x=ING[key];if(x.lock)return;
@@ -664,8 +803,9 @@ function dolad(volna,zbyva,tg){
       volna.forEach(m=>Object.keys(m.a).forEach(key=>{
         const x=ING[key];if(x.lock)return;
         const hust=x.c/Math.max(x.k,1);if(hust<0.09)return;
-        const krok=x.step||10, base=(m.z&&m.z[key])||basev(m.rec,key), next=m.a[key]+(zbytek>0?-krok:krok);
+        const krok=x.step||10, base=(m.z&&m.z[key])||basev(m.rec,key), puvodni=basev(m.rec,key), next=m.a[key]+(zbytek>0?-krok:krok);
         if(next<Math.max(x.step||5,base*0.6)||next>base*1.6)return;
+        if(next>puvodni*1.9||next<puvodni*0.4)return;
         if(!cil||hust>cil.hust)cil={m,key,next,hust,delta:(next-m.a[key])*x.k/100};
       }));
       if(!cil)break;
@@ -673,6 +813,54 @@ function dolad(volna,zbyva,tg){
       zbytek+=cil.delta;
     }
   }
+  /* 2b. fáze — dotáhnout tuky, taky kaloricky neutrálně.
+     Bez toho vycházel den kolem 20 % energie z tuků, což je málo. */
+  for(let it=0;it<30;it++){
+    const t=soucet(), vse=t.f+(tg.fHrnec||0);
+    if(vse>=(tg.fMin+tg.f)/2)break;   /* mířit nad spodní hranici, ne přesně na ni */
+    const chybi=tg.f-vse;
+    let zdroj=null;
+    volna.forEach(m=>Object.keys(m.a).forEach(key=>{
+      const x=ING[key];if(x.lock)return;
+      const hust=x.f/Math.max(x.k,1);if(hust<0.05)return;
+      const krok=x.step||5, base=(m.z&&m.z[key])||basev(m.rec,key), next=m.a[key]+krok;
+      if(next>base*1.6||next>basev(m.rec,key)*1.9)return;
+      if(!zdroj||hust>zdroj.hust)zdroj={m,key,next,hust,delta:(next-m.a[key])*x.k/100};
+    }));
+    if(!zdroj)break;
+    zdroj.m.a[zdroj.key]=zdroj.next;
+    let zbytek=zdroj.delta, pojistka=0;
+    while(zbytek>25&&pojistka++<10){
+      let cil=null;
+      volna.forEach(m=>Object.keys(m.a).forEach(key=>{
+        const x=ING[key];if(x.lock)return;
+        const hust=x.c/Math.max(x.k,1);if(hust<0.09)return;
+        const krok=x.step||10, base=(m.z&&m.z[key])||basev(m.rec,key), next=m.a[key]-krok;
+        if(next<Math.max(x.step||5,base*0.6))return;
+        if(!cil||hust>cil.hust)cil={m,key,next,hust,delta:(next-m.a[key])*x.k/100};
+      }));
+      if(!cil)break;
+      cil.m.a[cil.key]=cil.next;
+      zbytek+=cil.delta;
+    }
+  }
+
+  /* 2c. fáze — když tuků naopak přebývá, ubrat je ve prospěch sacharidů */
+  for(let it=0;it<20;it++){
+    const t=soucet(), vse=t.f+(tg.fHrnec||0);
+    if(vse<=tg.fMax)break;
+    let zdroj=null;
+    volna.forEach(m=>Object.keys(m.a).forEach(key=>{
+      const x=ING[key];if(x.lock)return;
+      const hust=x.f/Math.max(x.k,1);if(hust<0.05)return;
+      const krok=x.step||5, base=(m.z&&m.z[key])||basev(m.rec,key), next=m.a[key]-krok;
+      if(next<Math.max(x.step||5,base*0.5)||next<basev(m.rec,key)*0.4)return;
+      if(!zdroj||hust>zdroj.hust)zdroj={m,key,next,hust};
+    }));
+    if(!zdroj)break;
+    zdroj.m.a[zdroj.key]=zdroj.next;
+  }
+
   /* 3. fáze — doklepnout kalorie, ať den nakonec sedí */
   for(let it=0;it<40;it++){
     const rozdil=zbyva-soucet().k;
@@ -682,8 +870,9 @@ function dolad(volna,zbyva,tg){
       const x=ING[key];if(x.lock)return;
       const hust=(x.c+x.f)/Math.max(x.k,1);if(hust<0.05)return;
       const krok=x.step||Math.max(5,Math.min(30,Math.round(Math.abs(rozdil)/x.k*100/5)*5));
-      const base=(m.z&&m.z[key])||basev(m.rec,key), next=m.a[key]+(rozdil>0?krok:-krok);
+      const base=(m.z&&m.z[key])||basev(m.rec,key), puvodni=basev(m.rec,key), next=m.a[key]+(rozdil>0?krok:-krok);
       if(next<Math.max(x.step||5,base*0.55)||next>base*1.7)return;
+      if(next>puvodni*1.9||next<puvodni*0.4)return;
       if(!cil||hust>cil.hust)cil={m,key,next,hust};
     }));
     if(!cil)break;
@@ -691,84 +880,75 @@ function dolad(volna,zbyva,tg){
   }
 }
 
-function spocitej(iso){
-  const p=planTydne(iso);
-  const tg={};LIDE.forEach(o=>tg[o.id]=cile(o));
-
-  /* porce z jídla na víc dnů — pro každého jedna velikost, stejná všechny dny */
-  const cilPorce=(o,podil)=>o.cely
-    ? tg[o.id].kcal*podil
-    : JOZA_PODIL*tg[REFERENCNI].kcal*podil;      /* kdo nejí celý den, měří se podle Pepči */
-  const porcuj=(rec,podil)=>{
-    const zaklad=macros(scaleRec(rec,1)).k;
-    const porce={};
-    LIDE.forEach(o=>{porce[o.id]=scaleRec(rec,Math.min(1.8,Math.max(0.3,cilPorce(o,podil)/zaklad)),true)});
-    return{rec,porce};
+/* ---- porcování a stavba jednoho dne (používá to i automatický výběr) ---- */
+function cilePro(){const tg={};LIDE.forEach(o=>tg[o.id]=cile(o));return tg}
+function cilPorce(o,podil,tg){
+  return o.cely ? tg[o.id].kcal*podil
+                : JOZA_PODIL*tg[REFERENCNI].kcal*podil;   /* kdo nejí celý den, měří se podle Pepči */
+}
+function porcuj(rec,podil,tg){
+  const zaklad=macros(scaleRec(rec,1)).k;
+  const porce={};
+  LIDE.forEach(o=>{porce[o.id]=scaleRec(rec,Math.min(1.8,Math.max(0.3,cilPorce(o,podil,tg)/zaklad)),true)});
+  return{rec,porce};
+}
+function hrnceZPlanu(p,tg){
+  return{
+    hrnce:PAIRS.map((_,i)=>{const r=p.hrnce[i]?recById(p.hrnce[i]):null;return r?porcuj(r,SHARES.obed,tg):null}),
+    polevky:PAIRS.map((_,i)=>{const r=(jeVikend(i)&&p.polevky[i])?recById(p.polevky[i]):null;return r?porcuj(r,POLEVKA_PODIL,tg):null})
   };
-  const hrnce=PAIRS.map((_,i)=>{
-    const rec=p.hrnce[i]?recById(p.hrnce[i]):null;
-    if(!rec)return null;
-    return porcuj(rec,SHARES.obed);
+}
+function sestavDen(d,p,hrnce,polevky,tg){
+  const pi=PAIRS.findIndex(x=>x.includes(d));
+  const hrnec=hrnce[pi], polevka=polevky[pi];
+  const jidla=[];
+  ["snidane","svacina","polevka","obed","odpol","vecere","druha"].forEach(slot=>{
+    if(slot==="polevka"){
+      if(!polevka)return;
+      const porce={};LIDE.forEach(o=>{porce[o.id]=Object.assign({},polevka.porce[o.id])});
+      jidla.push({slot,rec:polevka.rec,porce,hrnec:pi,jePolevka:true});
+    }else if(slot==="obed"||slot==="vecere"){
+      if(!hrnec)return;
+      const porce={};
+      LIDE.forEach(o=>{
+        if(!o.cely&&slot==="vecere")return;        /* Joža večeři neřeší */
+        porce[o.id]=Object.assign({},hrnec.porce[o.id]);
+      });
+      jidla.push({slot,rec:hrnec.rec,porce,hrnec:pi});
+    }else{
+      const id=p.dny[d][slot];if(!id)return;
+      const rec=recById(id);if(!rec)return;
+      const zaklad=macros(scaleRec(rec,1)).k;
+      const porce={};
+      LIDE.filter(o=>o.cely).forEach(o=>{
+        porce[o.id]=scaleRec(rec,Math.min(1.7,Math.max(0.5,tg[o.id].kcal*SHARES[slot]/zaklad)));
+      });
+      jidla.push({slot,rec,porce});
+    }
   });
-  const polevky=PAIRS.map((_,i)=>{
-    const rec=(jeVikend(i)&&p.polevky[i])?recById(p.polevky[i]):null;
-    if(!rec)return null;
-    return porcuj(rec,POLEVKA_PODIL);
+  /* doladit každému zvlášť — uvařené jídlo zůstává, hýbou se jen volná jídla */
+  LIDE.filter(o=>o.cely).forEach(o=>{
+    const moje=jidla.filter(m=>m.porce[o.id]);
+    const volna=moje.filter(m=>m.hrnec===undefined).map(m=>({slot:m.slot,rec:m.rec,a:m.porce[o.id]}));
+    if(!volna.length)return;
+    let kHrnci={k:0,p:0,f:0};
+    moje.filter(m=>m.hrnec!==undefined).forEach(m=>{const x=macros(m.porce[o.id]);kHrnci.k+=x.k;kHrnci.p+=x.p;kHrnci.f+=x.f});
+    dolad(volna,Math.max(300,tg[o.id].kcal-kHrnci.k),
+          Object.assign({},tg[o.id],{pHrnec:kHrnci.p,fHrnec:kHrnci.f}));
   });
+  return jidla;
+}
+function souhrnDne(jidla,id){
+  const a={};jidla.forEach(m=>{const x=m.porce[id];if(x)for(const k in x)a[k]=(a[k]||0)+x[k]});
+  return macros(a);
+}
 
-  /* dny */
-  const dny=DAYS.map((nazev,d)=>{
-    const pi=PAIRS.findIndex(x=>x.includes(d));
-    const hrnec=hrnce[pi], polevka=polevky[pi];
-    const jidla=[];   /* {slot, rec, porce:{osoba:amounts}} */
-    const poradi=["snidane","svacina","polevka","obed","odpol","vecere","druha"];
-    poradi.forEach(slot=>{
-      if(slot==="polevka"){
-        if(!polevka)return;
-        const porce={};
-        LIDE.forEach(o=>{porce[o.id]=Object.assign({},polevka.porce[o.id])});
-        jidla.push({slot,rec:polevka.rec,porce,hrnec:pi,jePolevka:true});
-      }else if(slot==="obed"||slot==="vecere"){
-        if(!hrnec)return;
-        const porce={};
-        LIDE.forEach(o=>{
-          if(!o.cely&&slot==="vecere")return;      /* Joža večeři neřeší */
-          porce[o.id]=Object.assign({},hrnec.porce[o.id]);
-        });
-        jidla.push({slot,rec:hrnec.rec,porce,hrnec:pi});
-      }else{
-        const id=p.dny[d][slot];if(!id)return;
-        const rec=recById(id);if(!rec)return;
-        const zaklad=macros(scaleRec(rec,1)).k;
-        const porce={};
-        LIDE.filter(o=>o.cely).forEach(o=>{
-          porce[o.id]=scaleRec(rec,Math.min(1.7,Math.max(0.5,tg[o.id].kcal*SHARES[slot]/zaklad)));
-        });
-        jidla.push({slot,rec,porce});
-      }
-    });
-    /* doladit každému zvlášť — uvařené jídlo zůstává, hýbou se jen volná jídla */
-    LIDE.filter(o=>o.cely).forEach(o=>{
-      const moje=jidla.filter(m=>m.porce[o.id]);
-      const zHrnce=moje.filter(m=>m.hrnec!==undefined);
-      const volna=moje.filter(m=>m.hrnec===undefined).map(m=>({slot:m.slot,rec:m.rec,a:m.porce[o.id]}));
-      if(!volna.length)return;
-      let kHrnci={k:0,p:0};
-      zHrnce.forEach(m=>{const x=macros(m.porce[o.id]);kHrnci.k+=x.k;kHrnci.p+=x.p});
-      const cilOsoby=Object.assign({},tg[o.id],{pHrnec:kHrnci.p});
-      dolad(volna,Math.max(300,tg[o.id].kcal-kHrnci.k),cilOsoby);
-    });
-    return{nazev,datum:posun(iso,d),jidla,pi};
-  });
-
-  /* součty */
+function spocitej(iso){
+  const p=planTydne(iso), tg=cilePro();
+  const {hrnce,polevky}=hrnceZPlanu(p,tg);
+  const dny=DAYS.map((nazev,d)=>({nazev,datum:posun(iso,d),jidla:sestavDen(d,p,hrnce,polevky,tg),pi:PAIRS.findIndex(x=>x.includes(d))}));
   const souhrn={};
-  LIDE.forEach(o=>{
-    souhrn[o.id]=dny.map(den=>{
-      const a={};den.jidla.forEach(m=>{const x=m.porce[o.id];if(x)for(const k in x)a[k]=(a[k]||0)+x[k]});
-      return macros(a);
-    });
-  });
+  LIDE.forEach(o=>{souhrn[o.id]=dny.map(den=>souhrnDne(den.jidla,o.id))});
   return{plan:p,tg,hrnce,polevky,dny,souhrn};
 }
 
@@ -851,39 +1031,69 @@ function renderPeople(){
     const hlavni=o.cely?t.kcal:Math.round(t.kcal*SHARES.obed/10)*10;
     const popisek=o.cely?"kcal na den":"kcal na oběd";
     const makra=o.cely
-      ? `${t.p} g bílkovin · ${t.c} g sacharidů · ${t.f} g tuků`
+      ? `bílkoviny ${t.pMin}–${t.pMax} g · tuky ${t.fMin}–${t.fMax} g · vláknina ${t.vlMin}–${t.vlMax} g`
       : `celý den by mu vyšel na ${cz(t.kcal)} kcal — zapisujeme z něj jen oběd`;
     return `<div class="person ${o.id}">
       <h3>${o.jmeno}</h3><div class="kdo">${t.vek} let · ${o.cm} cm${o.cely?"":" · plánuje se jen oběd"}</div>
       <div class="big">${cz(hlavni)}<small> ${popisek}</small></div>
       <div class="macro">${makra}</div>
-      <div class="rezim">${t.pozn}.${t.auto&&o.kotva&&t.kg!==o.kotva.kg?` Každé kilo posune příjem o ${t.naKilo} kcal.`:""}${realita(o,t)}</div>
+      <div class="rezim">${t.pozn}.${t.auto&&o.kotva&&t.kg!==o.kotva.kg?` Každé kilo posune příjem o ${t.naKilo} kcal.`:""}${realita(o,t)}
+        ${o.cely?`<div class="hubnu">${hubnuti(o,t)}</div>`:""}
+        ${o.cely&&t.kcal<podlahaZivin(t)?`<div class="podlaha">Pod ${cz(podlahaZivin(t))} kcal už se spodní hranice bílkovin, tuků a sacharidů nedají naplnit současně.</div>`:""}</div>
       <div class="wrow">
         <input id="kg-${o.id}" type="number" step="0.1" inputmode="decimal" value="${t.kg}" aria-label="Váha ${o.jmeno} v kg" placeholder="kg">
         <button data-kg="${o.id}">Uložit váhu</button>
       </div>
+      <div class="wrow">
+        <input id="kroky-${o.id}" type="number" step="500" min="${KROKY_MIN}" inputmode="numeric" value="${krokyOsoby(o)}" aria-label="Kroky denně ${o.jmeno}" placeholder="kroků denně">
+        <button data-kroky="${o.id}">Uložit kroky</button>
+      </div>
+      ${krokyKeKontrole(o)?`<div class="krokvyzva">Kroky se nezměnily ${rozdilDnu(krokZaznam(o).od,dnes())} dní. Nešlo by přidat?
+        <span><button data-krokplus="${o.id}">+1 000</button><button data-krokok="${o.id}" class="tise">nechat</button></span></div>`
+      :`<div class="krokinfo">${cz(krokyOsoby(o))} kroků denně · naposledy ${dmt(krokZaznam(o).od)}</div>`}
       ${o.cely?`<div class="wrow">
-        <input id="kcal-${o.id}" type="number" step="10" inputmode="numeric" value="${t.auto?t.kcal:(vlastniKcal(o)||t.kcal)}" ${t.auto?"disabled":""} aria-label="Denní příjem ${o.jmeno}">
-        <button class="prepinac ${t.auto?"on":""}" data-auto="${o.id}">${t.auto?"automaticky":"ručně"}</button>
+        <input id="kcal-${o.id}" type="number" step="10" inputmode="numeric" value="${rezimPrijmu(o)==="rucne"?(vlastniKcal(o)||t.kcal):t.kcal}" ${rezimPrijmu(o)==="rucne"?"":"disabled"} aria-label="Denní příjem ${o.jmeno}">
+        <select class="rezim-select" data-rezim="${o.id}">
+          <option value="zaklad"${rezimPrijmu(o)==="zaklad"?" selected":""}>ze základu</option>
+          <option value="kroky"${rezimPrijmu(o)==="kroky"?" selected":""}>podle kroků</option>
+          <option value="rucne"${rezimPrijmu(o)==="rucne"?" selected":""}>ručně</option>
+        </select>
       </div>`:""}
       ${h.length>1?`<svg class="spark" id="spark-${o.id}" viewBox="0 0 300 60" preserveAspectRatio="none"></svg>`:""}
     </div>`;
   }).join("");
-  document.querySelectorAll("[data-auto]").forEach(b=>b.onclick=()=>{
-    const id=b.dataset.auto, db=DB.read();
-    db.rucne=db.rucne||{};
-    if(db.rucne[id]){                       /* zpátky na automatický přepočet */
-      delete db.rucne[id];delete (db.kcalRucne||{})[id];
-      DB.save();oznacZmenu();prekresli();
-      setStatus(osoba(id).jmeno+": příjem se zase dopočítává z váhy.");
-    }else{                                  /* přepnout na ruční zadání */
-      const v=document.getElementById("kcal-"+id).value.trim();
-      const n=Math.round(parseFloat(v.replace(",","."))/10)*10;
-      if(!(n>=1000&&n<=5000)){setStatus("Denní příjem zadej mezi 1000 a 5000 kcal.");return}
-      db.rucne[id]=true;db.kcalRucne=db.kcalRucne||{};db.kcalRucne[id]=n;
-      DB.save();oznacZmenu();prekresli();
-      setStatus(osoba(id).jmeno+": příjem nastaven ručně na "+n+" kcal.");
+  document.querySelectorAll("[data-kroky]").forEach(b=>b.onclick=()=>{
+    const id=b.dataset.kroky, n=parseInt(document.getElementById("kroky-"+id).value,10);
+    if(!ulozKroky(id,n)){setStatus("Kroky zadej mezi "+KROKY_MIN+" a 40 000.");return}
+    prekresli();setStatus(osoba(id).jmeno+": "+cz(n)+" kroků denně.");
+  });
+  document.querySelectorAll("[data-krokplus]").forEach(b=>b.onclick=()=>{
+    const id=b.dataset.krokplus, n=krokyOsoby(osoba(id))+1000;
+    if(!ulozKroky(id,n)){setStatus("Víc než 40 000 kroků už appka nepočítá.");return}
+    prekresli();setStatus(osoba(id).jmeno+": teď "+cz(n)+" kroků denně, jídlo se tomu přizpůsobilo.");
+  });
+  document.querySelectorAll("[data-krokok]").forEach(b=>b.onclick=()=>{
+    const id=b.dataset.krokok;
+    ulozKroky(id,krokyOsoby(osoba(id)));
+    prekresli();setStatus(osoba(id).jmeno+": necháváme, zeptám se za dva týdny.");
+  });
+  document.querySelectorAll("[data-rezim]").forEach(sel=>sel.onchange=()=>{
+    const id=sel.dataset.rezim, db=DB.read();
+    db.rezim=db.rezim||{};db.rezim[id]=sel.value;
+    if(sel.value==="rucne"&&!(db.kcalRucne||{})[id]){
+      db.kcalRucne=db.kcalRucne||{};db.kcalRucne[id]=cile(osoba(id)).kcal;
     }
+    DB.save();oznacZmenu();prekresli();
+  });
+  LIDE.filter(o=>o.cely).forEach(o=>{
+    const el=document.getElementById("kcal-"+o.id);
+    if(el)el.onchange=()=>{
+      if(rezimPrijmu(o)!=="rucne")return;
+      const n=Math.round(parseFloat(String(el.value).replace(",","."))/10)*10;
+      if(!(n>=1000&&n<=5000)){setStatus("Denní příjem zadej mezi 1000 a 5000 kcal.");return}
+      const db=DB.read();db.kcalRucne=db.kcalRucne||{};db.kcalRucne[o.id]=n;
+      DB.save();oznacZmenu();prekresli();
+    };
   });
   document.querySelectorAll("[data-kg]").forEach(b=>b.onclick=()=>{
     const id=b.dataset.kg;
@@ -899,6 +1109,28 @@ function renderPeople(){
     const body=h.map((p,i)=>`${X(i).toFixed(1)},${Y(p.kg).toFixed(1)}`).join(" ");
     svg.innerHTML=`<polyline points="${body}" fill="none" stroke="var(--${o.id})" stroke-width="2" vector-effect="non-scaling-stroke"></polyline>`;
   });
+}
+/* Kolik by ubývalo při různé chůzi. Klidový výdej podle Mifflin–St Jeor,
+   násobek aktivity 1,2 při 4 000 krocích a výš podle kroků. */
+/* Nejnižší příjem, ve kterém se ještě dají naplnit spodní hranice živin. */
+function podlahaZivin(t){return Math.round(t.pMin*4+t.fMin*9+t.cMin*4)}
+function hubnuti(o,t){
+  if(!o.cely)return "";
+  const bmr=bmrOsoby(o,t.kg), kroku=krokyOsoby(o);
+  const vydej=Math.round(bmr*palZKroku(kroku));
+  const zaTyden=(vydej-t.kcal)*7/7700;
+  const procent=Math.abs(zaTyden)/t.kg*100;
+  const zn=zaTyden>0.02?"−":(zaTyden<-0.02?"+":"±");
+  let hodnoceni="";
+  if(zaTyden<=0.02)hodnoceni=" — takhle se hubnout nedá, chybí deficit";
+  else if(procent<0.3)hodnoceni=" — pomalé, ale bezpečné";
+  else if(procent<=0.8)hodnoceni=" — rozumné tempo";
+  else{
+    /* při 0,6 % váhy týdně by měl příjem vypadat takhle */
+    const doporuc=Math.round((vydej-0.006*t.kg*7700/7)/10)*10;
+    hodnoceni=` — rychlé (${procent.toFixed(1).replace(".",",")} % váhy týdně). Klidnější tempo by dalo asi ${cz(doporuc)} kcal.`;
+  }
+  return `při ${cz(kroku)} krocích spálí kolem ${cz(vydej)} kcal → ${zn}${Math.abs(zaTyden).toFixed(2).replace(".",",")} kg týdně${hodnoceni}`;
 }
 function realita(o,t){
   if(!o.cely)return "";
@@ -1060,6 +1292,24 @@ function renderNabidka(){
 }
 
 /* ============ týden ============ */
+function renderPrumery(){
+  const box=document.getElementById("prumery");if(!box)return;
+  box.innerHTML=`<div class="prumtab">`+LIDE.filter(o=>o.cely).map(o=>{
+    const dny=VYPOCET.souhrn[o.id].filter(x=>x.k>0);
+    if(!dny.length)return "";
+    const t=VYPOCET.tg[o.id], pr=k=>Math.round(dny.reduce((a,x)=>a+x[k],0)/dny.length);
+    const radek=(nazev,hod,min,max,jed)=>{
+      const stav=hod<min?"pod":(hod>max?"nad":"ok");
+      return `<div class="mrad"><span>${nazev}</span><b class="${stav}">${hod} ${jed}</b><i>${min}–${max}</i></div>`;
+    };
+    return `<div class="prumos"><h4>${o.jmeno} — průměr dne</h4>`+
+      radek("Kalorie",pr("k"),Math.round(t.kcal*0.95),Math.round(t.kcal*1.08),"kcal")+
+      radek("Bílkoviny",pr("p"),t.pMin,t.pMax,"g")+
+      radek("Tuky",pr("f"),t.fMin,t.fMax,"g")+
+      radek("Vláknina",pr("vl"),t.vlMin,t.vlMax,"g")+
+      radek("Sacharidy",pr("c"),t.cMin,Math.round(t.c*1.4),"g")+`</div>`;
+  }).join("")+`</div>`;
+}
 function renderWeek(){
   document.getElementById("week").innerHTML=VYPOCET.dny.map((den,d)=>{
     const jidla=den.jidla.map(m=>{
@@ -1072,7 +1322,12 @@ function renderWeek(){
     }).join("")||`<div class="hint">Prázdný den — doplň ho v sekci Skládání týdne.</div>`;
     const nums=LIDE.map(o=>{
       const s=VYPOCET.souhrn[o.id][d];
-      return s.k?`${o.jmeno} <b>${Math.round(s.k)}</b> kcal / ${Math.round(s.p)} g B`:"";
+      if(!s.k)return "";
+      const t=VYPOCET.tg[o.id];
+      if(!o.cely)return `${o.jmeno} <b>${Math.round(s.k)}</b> kcal`;
+      const zn=(hod,min,max,jed)=>`<span class="${hod<min?"mimo":(hod>max?"nadpasmo":"")}">${Math.round(hod)} ${jed}</span>`;
+      return `${o.jmeno} <b>${Math.round(s.k)}</b> kcal · `+
+             zn(s.p,t.pMin,t.pMax,"g B")+" · "+zn(s.f,t.fMin,t.fMax,"g T")+" · "+zn(s.vl,t.vlMin,t.vlMax,"g vl");
     }).filter(Boolean).join(" · ");
     return `<div class="day">
       <div class="day-head"><div class="day-name">${den.nazev}</div><div class="day-date">${dmt(den.datum)}</div>
@@ -1249,6 +1504,8 @@ function checkReminder(){
     return dnu>=7?`${o.jmeno} (${dnu} dní)`:null;
   }).filter(Boolean);
   if(stare.length)zpravy.push("Čas na vážení: "+stare.join(", ")+".");
+  const kroky=LIDE.filter(o=>o.cely&&krokyKeKontrole(o)).map(o=>o.jmeno);
+  if(kroky.length)zpravy.push("Kroky se dva týdny nezměnily: "+kroky.join(", ")+". Zkus přidat tisícovku — v Úpravě jídelníčku.");
   co.classList.toggle("on",zpravy.length>0);
   document.getElementById("calloutText").innerHTML=
     zpravy.map((z,i)=>`<span class="${i===0&&nakup?"dulezite":""}">${z}</span>`).join("<br>");
@@ -1261,7 +1518,7 @@ function prekresli(){
   document.getElementById("wrange").textContent="("+dmt(TYDEN)+" – "+dmt(posun(TYDEN,6))+")";
   renderPeople();
   renderEditor();renderNabidka();
-  renderWeek();renderCook();renderShop();checkReminder();stavPodleSite();
+  renderWeek();renderPrumery();renderCook();renderShop();checkReminder();stavPodleSite();
 }
 
 /* ============ sdílení přes GitHub ============ */
@@ -1465,8 +1722,41 @@ window.addEventListener("offline",stavPodleSite);
 stavPodleSite();
 autoSync();
 
-if("serviceWorker" in navigator)
-  window.addEventListener("load",()=>navigator.serviceWorker.register("sw.js").catch(()=>{}));
+/* ============ hlídání nové verze ============ */
+let MOJE_VERZE=null;
+async function zjistiVerzi(prvni){
+  try{
+    const r=await fetch("verze.json?t="+Date.now(),{cache:"no-store"});
+    if(!r.ok)return;
+    const v=(await r.json()).verze;
+    if(prvni){MOJE_VERZE=v;return}
+    if(v&&MOJE_VERZE&&v!==MOJE_VERZE){
+      document.getElementById("novaVerzeText").textContent=
+        "Je k dispozici novější verze appky ("+v+"). Stáhne se, aby fungovala i offline.";
+      document.getElementById("novaVerze").classList.add("on");
+    }
+  }catch(e){/* offline — nevadí, jede se ze staré kopie */}
+}
+document.getElementById("nactiVerzi").onclick=async()=>{
+  try{
+    /* stáhnout novou verzi do cache dřív, než se stránka obnoví */
+    const reg=await navigator.serviceWorker.getRegistration();
+    if(reg){await reg.update();if(reg.waiting)reg.waiting.postMessage("skipWaiting")}
+    await Promise.all(["./index.html","./verze.json","./manifest.webmanifest"]
+      .map(u=>fetch(u+"?t="+Date.now(),{cache:"reload"}).catch(()=>{})));
+  }catch(e){}
+  location.reload();
+};
+
+if("serviceWorker" in navigator){
+  window.addEventListener("load",()=>{
+    navigator.serviceWorker.register("sw.js").catch(()=>{});
+    zjistiVerzi(true);
+    setInterval(()=>zjistiVerzi(false),30*60*1000);   /* jednou za půl hodiny */
+  });
+}
+document.addEventListener("visibilitychange",()=>{if(!document.hidden)zjistiVerzi(false)});
+window.addEventListener("online",()=>zjistiVerzi(false));
 </script>
 </body>
 </html>
