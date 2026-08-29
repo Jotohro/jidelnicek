@@ -1,40 +1,32 @@
 # Jídelníček pro tři — návod
 
-Appka počítá pro **Pepču**, **Simču** a **Jožu**. Pepča skládá týden,
-Simča ho vidí a dostane ranní upozornění do kalendáře, Joža má
-naplánovaný jen oběd.
+Appka počítá pro **Pepču**, **Simču** a **Jožu**. Je to jedna appka pro
+všechny, bez účtů a bez přihlašování — kdo ji má, vidí a mění všechno.
+Jožovi se plánuje jen oběd.
 
 ## Jak to počítá
 
-| | tuk | aktivní hmota | výdej | příjem | bílkoviny | ubývá |
-|---|---|---|---|---|---|---|
-| Pepča (186 cm, 106 kg, 25 let) | 30 % | 74 kg | 2 370 | **1 970 kcal** | 148 g | ~0,36 kg/týden |
-| Simča (167 cm, 77 kg, 50 let) | 30 % | 54 kg | 1 840 | **1 530 kcal** | 108 g | ~0,28 kg/týden |
-| Joža (176 cm, 100 kg, 86 let) | 30 % | 70 kg | 2 260 | **oběd ~370 kcal** | — | — |
+| | váha | denní příjem | bílkoviny |
+|---|---|---|---|
+| Pepča (nar. 2. 8. 2001, 186 cm) | 107 kg | **2 323 kcal** | 156 g |
+| Simča (nar. 14. 2. 1976, 167 cm) | 77 kg | **1 793 kcal** | 126 g |
+| Joža (nar. 14. 2. 1941, 176 cm) | 103 kg | oběd ~500 kcal | — |
 
-Klidový výdej počítá **Katch–McArdle z aktivní tělesné hmoty** — tedy
-z váhy bez tuku. Je to přesnější než počítat z celkové váhy, protože
-tuk skoro nic nespálí. Když u někoho tuk nevyplníš, spadne to zpátky
-na Mifflin–St Jeor podle váhy, výšky a věku. Násobek aktivity je 1,20
-(sedavý den při 4 000 krocích) a roste s počtem kroků až na 1,55 při
-deseti tisících. Pepča má o ~450 kcal míň, než spálí, Simča o ~300.
-**Joža jí tolik, kolik spálí** — v jeho věku je
-nechtěný úbytek váhy spojený spíš se ztrátou svalu než s lepším zdravím.
-Jestli má hubnout, ať to rozhodne jeho doktor.
+Kalorie nevycházejí z žádné obecné rovnice — **stojí na číslech, která
+jsi zadal**: Pepča má při 107 kg 2 323 kcal, Simča při 77 kg 1 793.
+Z toho si appka spočítala osobní koeficient a při jiné váze drží stejný
+poměr. Pepčovi udělá každé kilo rozdíl 11 kcal, Simče 13 kcal.
 
-**Příjem nikdy neklesne pod klidový metabolismus.** U Pepči i Simči na
-tuhle hranici výpočet naráží, takže mají 2 100 a 1 400 místo o něco
-nižších čísel. Pod tuhle hranici se dlouhodobě nechodí.
+**Přepínač auto/ručně** je v kartě u příjmu. V režimu *automaticky* jen
+přepíšeš váhu a kalorie se dopočítají. Když ťukneš na *ručně*, zadáš
+číslo napřímo a appka do něj nesahá — dokud nepřepneš zpátky.
 
-**Když ti spočítané číslo nesedí,** přepiš ho — v kartě je druhé políčko
-na denní příjem. Prázdné znamená „spočítej sám". **Joža se počítá jinak.** Jeho porce není podíl jeho vlastního dne, ale
-**70 % toho, co má Pepča** — u něj se plánuje jen oběd a rovnice pro
-šestaosmdesátiletého člověka stejně sedí špatně. Když má jíst víc nebo
-míň, změň to číslo v `index.html` u konstanty `JOZA_PODIL`.
+**Joža nemá vlastní výpočet.** Jeho den je 80 % Pepčova a plánuje se
+z něj jen oběd. Jeho váha se sleduje, ale do porcí nevstupuje.
 
-Bílkoviny se počítají **na kilo aktivní hmoty** — 2,0 g při redukci,
-1,8 g při udržování. Svalu je jedno, kolik kolem sebe nese tuku, takže
-Pepča má 148 g (ze 74 kg aktivní hmoty), ne 190 g z celkové váhy.
+Bílkoviny se počítají z **referenční váhy** — nejvýš té, která odpovídá
+BMI 25. U Pepči je to 86 kg místo 107, takže 156 g. Z celkové váhy by
+vyšlo přes 190 g, což se při 2 323 kcal nedá najíst.
 
 **Tělesný tuk zadáváš v kartě vedle váhy.** Když ho změříte přesněji,
 přepiš ho a všechno se přepočítá.
@@ -42,10 +34,27 @@ přepiš ho a všechno se přepočítá.
 Váhu kohokoliv přepíšeš v kartě nahoře a cíle se hned přepočítají.
 Historie se ukládá, takže se pod kartou objeví průběh.
 
+## Jak se v tom chodí
+
+Po spuštění je nahoře **výběr týdne** — šipky doleva a doprava, vedle
+číslo týdne a v závorce rozmezí dnů. Pod ním tři dlaždice:
+
+- **Jídelníček** — co se ten týden jí, kdy se co vaří, export do
+  kalendáře a tisk
+- **Nákupní seznam** — všechno na celý týden, položky jdou odškrtávat
+- **Úprava jídelníčku** — skládání, nabídka jídel, čísla lidí, sdílení
+
+Odkudkoliv se vrátíš odkazem *Zpět na rozcestník*. Výběr týdne platí
+všude — když přepneš týden a jdeš do nákupního seznamu, je to seznam na
+ten týden.
+
+Když se někdo přes týden nezvážil, objeví se pod výběrem týdne tmavý
+proužek se jmény. Váhy se zapisují v Úpravě jídelníčku.
+
 ## Jak se skládá týden
 
-1. Nahoře přepínáš týdny šipkami. Každý týden má vlastní plán.
-2. V **Skládání týdne** klikni na den a u každého chodu vyber jídlo
+1. Každý týden má vlastní plán, přepínají se šipkami nahoře.
+2. V **Úprava jídelníčku → Skládání týdne** klikni na den a u každého chodu vyber jídlo
    z nabídky.
 3. Vedle snídaní a svačin je rozbalovátko **přehodit na…** — prohodí
    to jídlo s vybraným dnem.
@@ -103,15 +112,35 @@ událostmi na 7:00. V každé je:
 Simča si soubor otevře a naimportuje do kalendáře. Pak jí to zvoní každé
 ráno i bez otevření appky. Nová verze se stahuje ke každému týdnu zvlášť.
 
-## Role
+## Nákupní seznam
 
-V **Nastavení** je přepínač *Kdo tuhle appku má*:
+Položky se odškrtávají zaškrtávátkem a **koupené se rovnou schovají**,
+takže seznam se cestou po obchodě scvrkává. Nahoře je počítadlo
+(„zbývá 12 z 43 položek"). Tlačítkem *ukázat koupené* si je vyvoláš
+zpátky, *Zrušit odškrtnutí* vrátí celý seznam.
 
-- **Pepča** — vidí skládání týdne a může sdílet
-- **Simča** — vidí jídelníček, vaření a nákup, skládání se skryje
+Co je potřeba dnes nebo zítra, má **červený proužek a štítek** a řadí se
+na začátek skupiny. Odškrtnutí platí pro daný týden — příští týden
+začíná načisto.
 
-Přepínač je jen pohodlí. Skutečné zamčení dělá token: Simčin token
-vygeneruj s oprávněním **Contents: Read-only** a zapisovat prostě nepůjde.
+## Upozornění na nákup
+
+Když se blíží vaření a suroviny nejsou koupené, objeví se nahoře tmavý
+proužek — na rozcestníku i v seznamu:
+
+> Zítra večer se vaří Losos, brambory, zeleninová směs — chybí losos
+> 615 g (5 filetů), brambory 1,2 kg (15 brambor).
+
+Množství je přesně to, co padne do toho jednoho vaření, ne týdenní
+součet. Jak věci odškrtáváš, hláška se zkracuje, a když je nakoupeno,
+zmizí. Ve dnech, kdy se nevaří, hlásí jen kolik položek zbývá na dnešek
+a zítřek.
+
+Upozornění se počítá jen pro **aktuální týden** — když si prohlížíš
+příští, appka mlčí.
+
+Vpravo nahoře v seznamu je stav synchronizace: *sesynchronizováno 14:32*, *čeká na
+odeslání* nebo *offline — uloží se, až bude signál*.
 
 ## Sdílení a nastavení
 
@@ -123,8 +152,19 @@ Postup je stejný jako dřív:
    Read and write**, Simča **Contents: Read-only**.
 4. V appce vyplň *Uživatel na GitHubu*, *Datový repozitář* a *Token*.
 
-Pepča po složení týdne klikne **Sdílet**, Simča **Načíst sdílené**.
-Appka to zkusí stáhnout i sama při každém spuštění.
+**Většinou nemusíš dělat nic.** Appka se sesynchronizuje sama: při
+spuštění, při každém návratu do popředí, a hned jak se telefon připojí
+k internetu. Po každé úpravě počká dvě a půl vteřiny (ať to nestřílí při
+každém kliknutí) a odešle. Tlačítka *Sdílet* a *Načíst sdílené* zůstala
+pro případ, že chceš ručně.
+
+Offline appka funguje normálně — změny se ukládají do telefonu
+a odešlou se, jakmile bude signál.
+
+**Když měníte oba naráz**, nepřepíšete se. Každé odškrtnutí i každý
+týdenní plán nese vlastní časovou značku a při slučování vyhrává ten
+novější zápis, položku po položce. Když jeden odškrtne chleba
+a druhý mrkev, zůstanou odškrtnuté obě.
 
 ## Gramy a míry
 

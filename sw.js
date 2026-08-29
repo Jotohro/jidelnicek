@@ -1,5 +1,5 @@
 /* Jídelníček — service worker. Zvyš VERSION, když změníš jakýkoliv soubor. */
-const VERSION = "v15";
+const VERSION = "v17";
 const CACHE = "jidelnicek-" + VERSION;
 const ASSETS = [
   "./",
