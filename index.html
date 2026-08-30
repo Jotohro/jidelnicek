@@ -524,18 +524,17 @@ const LIDE=[
   {id:"joza", jmeno:"Joža", nar:"1941-02-14",sex:"m",cm:176,kg:103,cely:false}
 ];
 const osoba=id=>LIDE.find(o=>o.id===id);
-const DAYS=["Neděle","Pondělí","Úterý","Středa","Čtvrtek","Pátek","Sobota"];
-const DAYSHORT=["Ne","Po","Út","St","Čt","Pá","So"];
-/* Vaří se první den dvojice a jí se ten den i další. Díky nedělnímu
-   začátku spadne každé vaření dovnitř týdne. */
-const PAIRS=[[0,1],[2,3],[4,5],[6]];
+const DAYS=["Pondělí","Úterý","Středa","Čtvrtek","Pátek","Sobota","Neděle"];
+const DAYSHORT=["Po","Út","St","Čt","Pá","So","Ne"];
+/* Dvojice dnů, které kryje jedno vaření. Pátek je sám, víkend spolu. */
+const PAIRS=[[0,1],[2,3],[4],[5,6]];
 /* podíly dne u toho, kdo jí celý den */
 const SHARES={snidane:0.20,svacina:0.08,obed:0.27,odpol:0.08,vecere:0.27,druha:0.10};
 const JOZA_PODIL=0.80;        /* Jožův den = 80 % Pepčova, plánuje se z něj jen oběd */
 const REFERENCNI="pepca";     /* podle koho se ta porce měří */
 const POLEVKA_PODIL=0.08;   /* polévka k obědu */
-const jeVikend=pi=>PAIRS[pi].some(d=>d===0||d===6);   /* várky, které kryjí neděli nebo sobotu */
-const vikendovyDen=d=>d===0||d===6;                      /* Jožovi plánujeme jen oběd */
+const jeVikend=pi=>PAIRS[pi].some(d=>d>=5);   /* várka, která kryje sobotu a neděli */
+const vikendovyDen=d=>d>=5;                      /* Jožovi plánujeme jen oběd */
 const SLOTNAME={snidane:"Snídaně",svacina:"Svačina",polevka:"Polévka",obed:"Oběd",odpol:"Odp. svačina",vecere:"Večeře",druha:"Druhá večeře"};
 const VOLNE=["snidane","svacina","odpol","druha"];   /* co se vybírá po dnech */
 const CATNAME={maso:"Maso a ryby",mleko:"Mléčné a vejce",pecivo:"Pečivo",priloha:"Přílohy",zelenina:"Zelenina",ovoce:"Ovoce",spiz:"Spíž a hotovky"};
@@ -560,15 +559,15 @@ const dnes=()=>new Date().toISOString().slice(0,10);
 const rozdilDnu=(a,b)=>Math.round((new Date(b)-new Date(a))/86400000);
 
 /* ============ týdny ============ */
-function pondeli(d){                     /* začátek týdne — neděle */
+function pondeli(d){                     /* začátek týdne — pondělí */
   const x=new Date(d);x.setHours(12,0,0,0);
-  x.setDate(x.getDate()-x.getDay());     /* getDay(): neděle = 0 */
+  x.setDate(x.getDate()-((x.getDay()+6)%7));
   return x.toISOString().slice(0,10);
 }
 function posun(iso,dni){const x=new Date(iso);x.setHours(12,0,0,0);x.setDate(x.getDate()+dni);return x.toISOString().slice(0,10)}
 function cisloTydne(iso){
   const d=new Date(iso);d.setHours(12,0,0,0);
-  const ctvrtek=new Date(d);ctvrtek.setDate(d.getDate()+4);   /* čtvrtek je čtvrtý den */
+  const ctvrtek=new Date(d);ctvrtek.setDate(d.getDate()+3);
   const prvni=new Date(ctvrtek.getFullYear(),0,4);
   return 1+Math.round(((ctvrtek-prvni)/86400000-3+((prvni.getDay()+6)%7))/7);
 }
@@ -895,16 +894,23 @@ function doplnPlan(iso,odznova){
 }
 
 /* Jídelníček se drží připravený na měsíc dopředu. */
-/* Plány z verzí, kde týden začínal pondělkem, mají jinou stavbu dvojic —
-   nedají se přepočítat, tak je zahodíme a naplánují se znovu. */
+/* Krátce se týden počítal od neděle. Plány uložené pod nedělí přesuneme
+   o den dopředu, ať jídla zůstanou lidem, co si je naplánovali —
+   nedělní jídlo se tak stane pondělním. */
 function uklidStarePlany(){
-  const db=DB.read();let smazano=0;
+  const db=DB.read();let presunuto=0;
   Object.keys(db.plany||{}).forEach(iso=>{
     const d=new Date(iso+"T12:00");
-    if(d.getDay()!==0){delete db.plany[iso];smazano++}
+    if(d.getDay()===0){
+      const cil=posun(iso,1);
+      if(!db.plany[cil])db.plany[cil]=db.plany[iso];
+      delete db.plany[iso];presunuto++;
+    }else if(d.getDay()!==1){
+      delete db.plany[iso];           /* nic jiného než pondělí nedává smysl */
+    }
   });
-  if(smazano)DB.save();
-  return smazano;
+  if(presunuto)DB.save();
+  return presunuto;
 }
 
 function pripravMesic(odIso){
@@ -1447,6 +1453,22 @@ function renderNabidka(){
 
 /* ============ týden ============ */
 /* ============ dnešek a zítřek na hlavní stránce ============ */
+/* Co se vaří v daný den. Nedělní várka patří k pondělku příštího týdne,
+   proto se v neděli díváme dopředu. */
+function vareniProDen(iso,d){
+  const tg=cilePro();
+  const zde=PAIRS.findIndex((par,pi)=>varitVDen(pi)===d);
+  if(zde>=0){
+    const p=planTydne(iso), {hrnce,polevky}=hrnceZPlanu(p,tg);
+    if(hrnce[zde])return{pi:zde,h:hrnce[zde],pol:polevky[zde],dny:PAIRS[zde].map(x=>DAYS[x].toLowerCase()),pristi:false};
+  }
+  if(d===DAYS.length-1){                    /* neděle — vaří se na pondělí a úterý */
+    const dalsi=posun(iso,7), p=planTydne(dalsi), {hrnce,polevky}=hrnceZPlanu(p,tg);
+    if(hrnce[0])return{pi:0,h:hrnce[0],pol:polevky[0],dny:PAIRS[0].map(x=>DAYS[x].toLowerCase()),pristi:true};
+  }
+  return null;
+}
+
 function renderDnes(){
   const box=document.getElementById("dnes");if(!box)return;
   const d=dnesIndex();
@@ -1458,7 +1480,7 @@ function renderDnes(){
   const puvod=m=>{
     if(m.hrnec===undefined)return "";
     const par=PAIRS[m.hrnec];
-    if(d===par[0])return `<span class="tag cerstve">vaří se dnes</span>`;
+    if(d===par[0])return `<span class="tag cerstve">uvařeno včera večer</span>`;
     if(par.length>1&&d===par[1])return `<span class="tag zbylo">zbylo ze včerejška</span>`;
     return "";
   };
@@ -1470,13 +1492,12 @@ function renderDnes(){
     ||`<div class="hint">Dnešek není složený — doplň ho v Úpravě jídelníčku.</div>`;
 
   let vareni="";
-  PAIRS.forEach((par,pi)=>{
-    if(Math.max(0,varitVDen(pi))!==d)return;
-    const h=VYPOCET.hrnce[pi];if(!h)return;
-    const pol=VYPOCET.polevky[pi];
-    const naDny=par.map(x=>DAYS[x].toLowerCase()).join(" a ");
-    vareni=`<div class="dvareni">Dnes se vaří <b>${h.rec.n}</b>${pol?` a ${pol.rec.n.toLowerCase()}`:""} — ${pocetPorci(pi)} porcí na ${naDny}.</div>`;
-  });
+  {
+    const v=vareniProDen(TYDEN,d);
+    if(v)vareni=`<div class="dvareni">Dnes večer se vaří <b>${v.h.rec.n}</b>`+
+      `${v.pol?` a ${v.pol.rec.n.toLowerCase()}`:""} — ${pocetPorci(v.pi)} porcí na `+
+      `${v.dny.join(" a ")}${v.pristi?" příštího týdne":""}.</div>`;
+  }
 
   const zitrek=zitra
     ? `<div class="zitrakarta"><h3>Zítra · ${zitra.nazev} ${dmt(zitra.datum)}</h3>`+
@@ -1557,7 +1578,7 @@ function renderWeek(){
 }
 
 /* ============ vaření ============ */
-const VECER=["V neděli","V úterý","Ve čtvrtek","V sobotu"];
+const VECER=["V neděli večer","V úterý večer","Ve čtvrtek večer","V pátek večer"];
 function renderCook(){
   document.getElementById("cook").innerHTML=PAIRS.map((par,pi)=>{
     const h=VYPOCET.hrnce[pi], pol=VYPOCET.polevky[pi];
@@ -1631,7 +1652,7 @@ function renderShop(){
 }
 
 /* ============ kalendář ============ */
-function varitVDen(pi){return PAIRS[pi][0]}   /* vaří se první den dvojice */
+function varitVDen(pi){return PAIRS[pi][0]-1}   /* vaří se večer předtím */
 function makeICS(){
   const pad=n=>String(n).padStart(2,"0");
   const ev=[];
@@ -1640,7 +1661,7 @@ function makeICS(){
     const odpol=den.jidla.find(m=>m.slot==="odpol");
     const zitra=VYPOCET.dny[d+1];
     const zitraObed=zitra&&zitra.jidla.find(m=>m.slot==="obed");
-    const varit=PAIRS.findIndex((p,pi)=>varitVDen(pi)===d);
+    const varit=vareniProDen(TYDEN,d);
     const popis=[];
     [["Svačina",svacina],["Odpolední svačina",odpol]].forEach(([nazev,m])=>{
       if(!m)return;
@@ -1651,8 +1672,9 @@ function makeICS(){
       const zitraPol=zitra.jidla.find(m=>m.slot==="polevka");
       popis.push("","Zítra k obědu: "+(zitraPol?zitraPol.rec.n+" a ":"")+zitraObed.rec.n);
     }
-    if(varit>=0&&VYPOCET.hrnce[varit])
-      popis.push("","DNES UVAŘIT: "+VYPOCET.hrnce[varit].rec.n+" ("+pocetPorci(varit)+" porcí)");
+    if(varit)
+      popis.push("","DNES VEČER UVAŘIT: "+varit.h.rec.n+" ("+pocetPorci(varit.pi)+" porcí na "+
+        varit.dny.join(" a ")+(varit.pristi?" příštího týdne":"")+")");
     if(!popis.length)return;
     const nadpis=(svacina?"Svačina: "+svacina.rec.n:"Jídlo")+(zitraObed?" · zítra oběd: "+zitraObed.rec.n:"");
     const dt=den.datum.replace(/-/g,"");
@@ -1690,6 +1712,7 @@ function chybiKoupit(){
 
   /* 1) nejnaléhavější je vaření — na to je potřeba mít suroviny pohromadě */
   for(let pi=0;pi<PAIRS.length;pi++){
+    /* nedělní vaření patří k pondělku, proto se den srovnává na začátek várky */
     const vd=Math.max(0,varitVDen(pi));
     if(vd!==dnesId&&vd!==dnesId+1)continue;
     const h=VYPOCET.hrnce[pi];
@@ -1702,7 +1725,7 @@ function chybiKoupit(){
       if(a)for(const k in a)total[k]=(total[k]||0)+a[k]*n});
     const chybi=Object.keys(total).filter(k=>!odskrtnuto(k));
     if(!chybi.length)continue;
-    return `${vd===dnesId?"Dnes":"Zítra"} se vaří ${h.rec.n}${pol?" a "+pol.rec.n.toLowerCase():""} — chybí `+
+    return `${vd===dnesId?"Dnes":"Zítra"} večer se vaří ${h.rec.n}${pol?" a "+pol.rec.n.toLowerCase():""} — chybí `+
       chybi.map(k=>ING[k].n.toLowerCase()+" "+fmtG(k,total[k])).join(", ")+".";
   }
 
