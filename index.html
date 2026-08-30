@@ -371,6 +371,7 @@ footer{margin-top:42px;padding-top:16px;border-top:1px solid var(--line);font-si
         <input id="importFile" type="file" accept="application/json" style="display:none">
       </div>
       <div class="status" id="syncStatus"></div>
+      <div class="status">Verze appky: <b id="verzeApp">zjišťuji…</b></div>
     </div>
   </section>
 </div>
@@ -624,7 +625,7 @@ function ulozKroky(id,kroku){
   if(!(kroku>=KROKY_MIN&&kroku<=40000))return false;
   const db=DB.read();db.kroky=db.kroky||{};
   db.kroky[id]={kroky:kroku,od:dnes()};
-  DB.save();oznacZmenu("nastaveni");return true;
+  DB.save();oznacZmenu("nastaveni","kroky");return true;
 }
 function rezimPrijmu(o){return (DB.read().rezim||{})[o.id]||"zaklad"}
 function vekOsoby(o){
@@ -1206,7 +1207,7 @@ function renderPeople(){
     if(sel.value==="rucne"&&!(db.kcalRucne||{})[id]){
       db.kcalRucne=db.kcalRucne||{};db.kcalRucne[id]=cile(osoba(id)).kcal;
     }
-    DB.save();oznacZmenu("nastaveni");prekresli();
+    DB.save();oznacZmenu("nastaveni","rezim");oznacZmenu("nastaveni","kcalRucne");prekresli();
   });
   LIDE.filter(o=>o.cely).forEach(o=>{
     const el=document.getElementById("kcal-"+o.id);
@@ -1215,7 +1216,7 @@ function renderPeople(){
       const n=Math.round(parseFloat(String(el.value).replace(",","."))/10)*10;
       if(!(n>=1000&&n<=5000)){setStatus("Denní příjem zadej mezi 1000 a 5000 kcal.");return}
       const db=DB.read();db.kcalRucne=db.kcalRucne||{};db.kcalRucne[o.id]=n;
-      DB.save();oznacZmenu("nastaveni");prekresli();
+      DB.save();oznacZmenu("nastaveni","kcalRucne");prekresli();
     };
   });
   document.querySelectorAll("[data-kg]").forEach(b=>b.onclick=()=>{
@@ -1274,7 +1275,7 @@ function ulozVahu(id,kg){
   if(z)z.kg=kg;else db.vahy[id].push({d:dnes(),kg});
   db.vahy[id].sort((a,b)=>a.d<b.d?-1:1);
   delete db.snooze;
-  DB.save();oznacZmenu("nastaveni");
+  DB.save();oznacZmenu("nastaveni","kg");
   prekresli();
   setStatus(osoba(id).jmeno+": zapsáno "+String(kg).replace(".",",")+" kg.");
 }
@@ -1410,13 +1411,13 @@ function renderNabidka(){
       ${radky}</div>`;
   }).join("");
   box.querySelectorAll("[data-jidlo]").forEach(ch=>ch.onchange=()=>{
-    prepniJidlo(ch.dataset.jidlo,ch.checked);oznacZmenu("nastaveni");prekresli();
+    prepniJidlo(ch.dataset.jidlo,ch.checked);oznacZmenu("nastaveni","vypnute");prekresli();
   });
   box.querySelectorAll("[data-vse]").forEach(b=>b.onclick=()=>{
-    vsechna(b.dataset.vse).forEach(r=>prepniJidlo(r.id,true));oznacZmenu("nastaveni");prekresli();
+    vsechna(b.dataset.vse).forEach(r=>prepniJidlo(r.id,true));oznacZmenu("nastaveni","vypnute");prekresli();
   });
   box.querySelectorAll("[data-nic]").forEach(b=>b.onclick=()=>{
-    vsechna(b.dataset.nic).forEach(r=>prepniJidlo(r.id,false));oznacZmenu("nastaveni");prekresli();
+    vsechna(b.dataset.nic).forEach(r=>prepniJidlo(r.id,false));oznacZmenu("nastaveni","vypnute");prekresli();
   });
 }
 
@@ -1725,13 +1726,23 @@ function prekresli(){
 
 /* ============ sdílení přes GitHub ============ */
 let syncTimer=null;
-function oznacZmenu(coSeZmenilo){
+function casNastaveni(klic,cas){
+  const db=DB.read();db.casy=db.casy||{};
+  db.casy[klic]=cas||Date.now();
+}
+function oznacZmenu(coSeZmenilo,klic){
   /* "plan" = úprava jídelníčku, "nastaveni" = čísla lidí, jinak jen drobnost
      (třeba odškrtnutí nákupu). Nesmí se všechno tvářit jako změna plánu,
      jinak by jeden telefon přepsal úpravy druhého. */
   const db=DB.read();
   db.dirty=true;
-  if(coSeZmenilo==="nastaveni")db.nastaveniT=Date.now();
+  if(coSeZmenilo==="nastaveni"){
+    db.nastaveniT=Date.now();
+    /* každé nastavení má vlastní razítko — jinak by jeden telefon přebil
+       všechna nastavení druhého jen proto, že měnil jednu věc */
+    db.casy=db.casy||{};
+    (klic?[klic]:SDILENA_NASTAVENI).forEach(k=>db.casy[k]=Date.now());
+  }
   if(coSeZmenilo==="plan"&&db.plany[TYDEN])db.plany[TYDEN].t=Date.now();
   DB.save();
   clearTimeout(syncTimer);
@@ -1810,7 +1821,8 @@ async function syncPush(potichu){
       const {sha}=await GH.nacti(c);
       const db=DB.read();
       const telo={plany:db.plany,nakup:db.nakup,vahy:db.vahy,
-                  nastaveniT:db.nastaveniT||0,cas:new Date().toLocaleString("cs")};
+                  casy:db.casy||{},nastaveniT:db.nastaveniT||0,
+                  cas:new Date().toLocaleString("cs")};
       SDILENA_NASTAVENI.forEach(k=>{if(db[k]!==undefined)telo[k]=db[k]});
       await GH.zapis(c,telo,sha);
       const d=DB.read();d.dirty=false;d.syncCas=new Date().toLocaleTimeString("cs",{hour:"2-digit",minute:"2-digit"});DB.save();
@@ -1849,10 +1861,18 @@ async function syncPull(potichu){
       });
     }
     /* nastavení lidí jako blok — novější strana vyhrává */
-    if(data.nastaveniT&&data.nastaveniT>(db.nastaveniT||0)){
-      SDILENA_NASTAVENI.forEach(k=>{if(data[k]!==undefined)db[k]=data[k]});
-      db.nastaveniT=data.nastaveniT;
-    }
+    /* nastavení po jednom: vyhrává novější razítko, ne celý blok */
+    db.casy=db.casy||{};
+    const cizi=data.casy||{};
+    SDILENA_NASTAVENI.forEach(k=>{
+      if(data[k]===undefined)return;
+      const jejich=cizi[k]||data.nastaveniT||0, moje=db.casy[k]||0;
+      /* když doma ještě nic nastavené není, ber cizí i bez razítka */
+      if(jejich>moje||(db[k]===undefined&&jejich>=moje)){
+        db[k]=data[k];db.casy[k]=jejich;
+      }
+    });
+    db.nastaveniT=Math.max(db.nastaveniT||0,data.nastaveniT||0);
     if(data.vahy)Object.keys(data.vahy).forEach(id=>{
       db.vahy[id]=db.vahy[id]||[];
       data.vahy[id].forEach(v=>{if(!db.vahy[id].find(x=>x.d===v.d))db.vahy[id].push(v)});
@@ -1958,12 +1978,13 @@ autoSync();
 
 /* ============ hlídání nové verze ============ */
 let MOJE_VERZE=null;
+function ukazVerzi(v){const e=document.getElementById("verzeApp");if(e)e.textContent=v}
 async function zjistiVerzi(prvni){
   try{
     const r=await fetch("verze.json?t="+Date.now(),{cache:"no-store"});
     if(!r.ok)return;
     const v=(await r.json()).verze;
-    if(prvni){MOJE_VERZE=v;return}
+    if(prvni){MOJE_VERZE=v;ukazVerzi(v);return}
     if(v&&MOJE_VERZE&&v!==MOJE_VERZE){
       document.getElementById("novaVerzeText").textContent=
         "Je k dispozici novější verze appky ("+v+"). Stáhne se, aby fungovala i offline.";
