@@ -155,10 +155,10 @@ proužek se jmény. Váhy se zapisují v Úpravě jídelníčku.
 3. Vedle snídaní a svačin je rozbalovátko **přehodit na…** — prohodí
    to jídlo s vybraným dnem.
 4. **Oběd je společný pro dvojici dnů** — vaří se na dva dny. Dvojice jsou
-   **Po+Út, St+Čt, Pá samotný, So+Ne**. Změna oběda platí pro celou dvojici.
-5. **Polévka se dělá jen o víkendu** — patří k sobotnímu vaření a vydrží
-   na neděli. Ve všední dny se řádek polévky vůbec neukáže. Dá se nechat
-   prázdná („bez polévky"), nebo si všechny polévky odškrtni v nabídce.
+   **Ne+Po, Út+St, Čt+Pá, So samotná**. Změna oběda platí pro celou dvojici.
+5. **Polévka se podává jen v neděli a v sobotu.** Vaří se s tou várkou,
+   která ten den kryje. Dá se nechat prázdná („bez polévky"), nebo si
+   všechny polévky odškrtni v nabídce.
 6. **Doplnit prázdná místa** vyplní, co chybí, a nechá být, cos vybral.
 
 **Jídelníček se dělá sám na měsíc dopředu.** Při spuštění appka připraví
@@ -219,11 +219,14 @@ tam je.
 ## Kolik se vaří
 
 Jídlo vařené na dva dny je na **10 porcí**: Pepča 4× (oběd i večeře, dva dny),
-Simča 4×, Joža 2× obědy. V pátek se vaří jen **5 porcí**, protože kryje jediný den. Každý má jinou velikost porce, takže sekce **Kdy co
+Simča 4×, Joža 2× obědy. V sobotu se vaří jen **5 porcí**, protože kryje jediný den. Každý má jinou velikost porce, takže sekce **Kdy co
 uvařit** ukazuje rovnou celkové gramáže — zvlášť hlavní jídlo, zvlášť
 polévku.
 
-Vaří se v neděli, úterý, čtvrtek a v pátek večer.
+**Týden začíná nedělí**, protože v neděli se vaří na pondělí. Vaří se
+vždycky první den dvojice a jí se ten den i další — v neděli, v úterý,
+ve čtvrtek a v sobotu. Sobotní várka kryje jen jeden den, takže je
+poloviční.
 
 ## Co je v nabídce
 
