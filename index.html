@@ -189,6 +189,7 @@ button:focus-visible{outline:2px solid var(--beet);outline-offset:2px}
 .sl-polevka{background:#8a7f6e}
 .sl-obed{background:var(--beet)} .sl-odpol{background:#b98fa4}
 .sl-vecere{background:var(--herb)} .sl-druha{background:#96b3a1}
+.sl-doplnek{background:#6e7d73}
 .prumtab{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:20px}
 .prumos h4{font-family:var(--display);font-size:16px;margin:0 0 8px;padding-bottom:6px;border-bottom:1px solid var(--line)}
 .mrad{display:flex;align-items:baseline;gap:8px;font-size:14px;padding:3px 0}
@@ -423,6 +424,9 @@ const ING={
  okurka:{n:"Okurka salátová",k:15,p:0.7,c:3,f:0.1,vl:0.5,cat:"zelenina"},
  rajce:{n:"Rajčata",k:18,p:0.9,c:3.5,f:0.2,vl:1.2,cat:"zelenina"},
  cherry:{n:"Cherry rajčata",k:20,p:0.9,c:3.5,f:0.2,vl:1.2,cat:"zelenina",step:10},
+ tvaroh:{n:"Tvaroh polotučný",k:96,p:16,c:3.5,f:2.5,vl:0,cat:"mleko",step:250},
+ skyr:{n:"Skyr",k:63,p:11,c:4,f:0.2,vl:0,cat:"mleko",step:140},
+ mandle:{n:"Mandle",k:579,p:21,c:9,f:50,vl:12.5,cat:"spiz",step:10},
  mrkev:{n:"Mrkev",k:41,p:0.9,c:8,f:0.2,vl:2.8,cat:"zelenina"},
  cibule:{n:"Cibule",k:40,p:1.1,c:8,f:0.1,vl:1.7,cat:"zelenina"},
  zampiony:{n:"Žampiony",k:22,p:3,c:1,f:0.3,vl:1,cat:"zelenina"},
@@ -535,7 +539,7 @@ const REFERENCNI="pepca";     /* podle koho se ta porce měří */
 const POLEVKA_PODIL=0.08;   /* polévka k obědu */
 const jeVikend=pi=>PAIRS[pi].some(d=>d>=5);   /* várka, která kryje sobotu a neděli */
 const vikendovyDen=d=>d>=5;                      /* Jožovi plánujeme jen oběd */
-const SLOTNAME={snidane:"Snídaně",svacina:"Svačina",polevka:"Polévka",obed:"Oběd",odpol:"Odp. svačina",vecere:"Večeře",druha:"Druhá večeře"};
+const SLOTNAME={snidane:"Snídaně",svacina:"Svačina",polevka:"Polévka",doplnek:"Dorovnání",obed:"Oběd",odpol:"Odp. svačina",vecere:"Večeře",druha:"Druhá večeře"};
 const VOLNE=["snidane","svacina","odpol","druha"];   /* co se vybírá po dnech */
 const CATNAME={maso:"Maso a ryby",mleko:"Mléčné a vejce",pecivo:"Pečivo",priloha:"Přílohy",zelenina:"Zelenina",ovoce:"Ovoce",spiz:"Spíž a hotovky"};
 /* v nabídce svačin jedeme dvě skupiny receptů dohromady */
@@ -756,7 +760,14 @@ function ohodnotDny(dny,p,hrnce,polevky,tg){
   let x=0;
   dny.forEach(d=>{
     const jidla=sestavDen(d,p,hrnce,polevky,tg);
-    LIDE.filter(o=>o.cely).forEach(o=>{x+=pokuta(souhrnDne(jidla,o.id),tg[o.id])});
+    const dopl=jidla.find(m=>m.slot==="doplnek");
+    LIDE.filter(o=>o.cely).forEach(o=>{
+      x+=pokuta(souhrnDne(jidla,o.id),tg[o.id]);
+      /* Dorovnání je záchranná brzda, ne řešení. Den, který se bez něj
+         obejde, je lepší — jinak by automat klidně naplánoval rohlík
+         s marmeládou a spolehl se, že to zachrání hrst ořechů. */
+      if(dopl&&dopl.porce[o.id])x+=macros(dopl.porce[o.id]).k/100*1.6;
+    });
   });
   return x;
 }
@@ -776,6 +787,13 @@ function optimalizuj(iso,mista,kola){
       const jinde=p.hrnce.filter((x,j)=>j!==misto.i&&x);
       const bez=kandidati.filter(r=>!jinde.includes(r.id));
       if(bez.length>=2)kandidati=bez;
+    }
+    if(misto.typ==="volne"){
+      /* stejné jídlo dva dny po sobě ne — obden ano */
+      const sousedi=[p.dny[misto.d-1],p.dny[misto.d+1]]
+        .filter(Boolean).map(den=>den[misto.slot]).filter(Boolean);
+      const bez=kandidati.filter(r=>!sousedi.includes(r.id));
+      if(bez.length)kandidati=bez;
     }
     if(kandidati.length<2)return;
     let nej=null;
@@ -852,6 +870,13 @@ function doplnPlan(iso,odznova){
       const bez=kandidati.filter(r=>!jinde.includes(r.id));
       if(bez.length>=2)kandidati=bez;
     }
+    if(misto.typ==="volne"){
+      /* stejné jídlo dva dny po sobě ne — obden ano */
+      const sousedi=[p.dny[misto.d-1],p.dny[misto.d+1]]
+        .filter(Boolean).map(den=>den[misto.slot]).filter(Boolean);
+      const bez=kandidati.filter(r=>!sousedi.includes(r.id));
+      if(bez.length)kandidati=bez;
+    }
     if(kandidati.length<2)return;
     let nej=null;
     kandidati.forEach(r=>{
@@ -871,23 +896,31 @@ function doplnPlan(iso,odznova){
     });
   }
 
-  /* 3. dvakrát po sobě totéž jídlo je nuda — když je náhrada skoro stejně dobrá, vyměnit */
+  /* 3. dvakrát po sobě totéž jídlo se nesmí stát — tady se to už vynucuje,
+        ne jen doporučuje. Vybere se nejlepší z toho, co nekoliduje se sousedy. */
   p.dny.forEach((den,d)=>VOLNE.forEach(slot=>{
-    const pred=d>0?p.dny[d-1][slot]:null;
-    if(pred!==den[slot])return;
-    const jine=nabidka(slot).filter(r=>r.id!==pred);
-    if(!jine.length)return;
-    const puvodni=den[slot];
+    if(jeZamceno(p,{typ:"volne",d,slot}))return;
+    const sousedi=[p.dny[d-1],p.dny[d+1]].filter(Boolean).map(x=>x[slot]).filter(Boolean);
+    if(!sousedi.includes(den[slot]))return;
+    const jine=nabidka(slot).filter(r=>!sousedi.includes(r.id));
+    if(!jine.length)return;                 /* není z čeho vybrat, necháme být */
     const {hrnce,polevky}=hrnceZPlanu(p,tg);
-    const zaklad=ohodnotDny([d],p,hrnce,polevky,tg);
     let nej=null;
     jine.forEach(r=>{
       den[slot]=r.id;
       const skore=ohodnotDny([d],p,hrnce,polevky,tg);
       if(!nej||skore<nej.skore)nej={id:r.id,skore};
     });
-    den[slot]=(nej&&nej.skore<zaklad+0.5)?nej.id:puvodni;
+    den[slot]=nej.id;
   }));
+
+  /* 4. ještě jedno kolo optimalizace — pravidlo o sousedech drží dál,
+        ale den se stihne dorovnat po vynucených výměnách */
+  menitelne.filter(m=>!jeZamceno(p,m)).forEach(m=>{
+    if(m.typ==="hrnec")zkus(m,id=>p.hrnce[m.i]=id);
+    else if(m.typ==="polevka")zkus(m,id=>p.polevky[m.i]=id);
+    else zkus(m,id=>p.dny[m.d][m.slot]=id);
+  });
 
   DB.save();
   return p;
@@ -1081,6 +1114,7 @@ function sestavDen(d,p,hrnce,polevky,tg){
     }
   });
   /* doladit každému zvlášť — uvařené jídlo zůstává, hýbou se jen volná jídla */
+  const dorovnat={};
   LIDE.filter(o=>o.cely).forEach(o=>{
     const moje=jidla.filter(m=>m.porce[o.id]);
     const volna=moje.filter(m=>m.hrnec===undefined).map(m=>({slot:m.slot,rec:m.rec,a:m.porce[o.id]}));
@@ -1089,8 +1123,65 @@ function sestavDen(d,p,hrnce,polevky,tg){
     moje.filter(m=>m.hrnec!==undefined).forEach(m=>{const x=macros(m.porce[o.id]);kHrnci.k+=x.k;kHrnci.p+=x.p;kHrnci.f+=x.f});
     dolad(volna,Math.max(300,tg[o.id].kcal-kHrnci.k),
           Object.assign({},tg[o.id],{pHrnec:kHrnci.p,fHrnec:kHrnci.f}));
+    const dpl=dorovnani(souhrnDne(jidla,o.id),tg[o.id],d+(o.id==="simca"?1:0));
+    if(dpl)dorovnat[o.id]=dpl;
   });
+  if(Object.keys(dorovnat).length)
+    jidla.push({slot:"doplnek",rec:{id:"doplnek",n:"Dorovnání",i:[]},porce:dorovnat});
   return jidla;
+}
+/* Když se den nevejde do spodních hranic ani po doladění porcí, přidá se
+   dorovnání — malá věc navíc, jakou by člověk stejně sáhl do ledničky. */
+const DOPLNKY=[
+  {k:"tvaroh", d:50,  max:200, ziv:"p"},
+  {k:"skyr",   d:140, max:280, ziv:"p"},
+  {k:"tunak",  d:80,  max:160, ziv:"p"},
+  {k:"protein",d:28,  max:56,  ziv:"p"},
+  {k:"mandle", d:10,  max:30,  ziv:"f"},
+  {k:"orechy", d:10,  max:30,  ziv:"f"},
+  {k:"jablko",   d:150, max:150, ziv:"vl"},
+  {k:"hruska",   d:150, max:150, ziv:"vl"},
+  {k:"maliny",   d:50,  max:100, ziv:"vl"},
+  {k:"knacke",   d:10,  max:30,  ziv:"vl"},
+  {k:"brokolice",d:80,  max:160, ziv:"vl"},
+  {k:"fazolky",  d:100, max:200, ziv:"vl"},
+  {k:"mrkev",    d:80,  max:160, ziv:"vl"},
+  {k:"spenat",   d:100, max:150, ziv:"vl"}
+];
+function dorovnani(soucet,tg,seed){
+  const pridat={};
+  const stav=()=>{
+    const m=macros(pridat);
+    return{p:soucet.p+m.p,f:soucet.f+m.f,vl:soucet.vl+m.vl,k:soucet.k+m.k};
+  };
+  for(let it=0;it<60;it++){
+    const s=stav();
+    /* pár gramů pod hranicí se neřeší — dorovnání má smysl až od 3 % */
+    const prah=Object.keys(pridat).length?0.001:0.03;
+    const mezery=[["p",(tg.pMin-s.p)/tg.pMin],["f",(tg.fMin-s.f)/tg.fMin],["vl",(tg.vlMin-s.vl)/tg.vlMin]]
+      .filter(x=>x[1]>prah).sort((a,b)=>b[1]-a[1]);
+    if(!mezery.length)break;
+    if(s.k>tg.kcal*1.12)break;            /* radši mírně pod hranicí než přejedený den */
+    if(Object.keys(pridat).length>=2&&!mezery.length)break;
+    if(Object.keys(pridat).length>=2){
+      /* víc než dvě věci navíc už není dorovnání, ale další jídlo */
+      const lze=DOPLNKY.filter(x=>x.ziv===mezery[0][0]&&pridat[x.k]!==undefined
+        &&(pridat[x.k]+x.d)<=x.max);
+      if(!lze.length)break;
+    }
+    const ziv=mezery[0][0];
+    const pole=ziv==="p"?"p":ziv==="f"?"f":"vl";
+    const moznosti=DOPLNKY.filter(x=>x.ziv===ziv&&ING[x.k]&&((pridat[x.k]||0)+x.d)<=x.max)
+      .map(x=>({x,kolik:(pridat[x.k]||0)+x.d,hust:ING[x.k][pole]/Math.max(ING[x.k].k,1)}))
+      .sort((a,b)=>b.hust-a.hust);
+    if(!moznosti.length)break;
+    /* mezi třemi nejhustšími se střídá podle dne, ať to nejsou pořád maliny */
+    const uz=Object.keys(pridat);
+    const vybrane=moznosti.find(m=>uz.includes(m.x.k))
+      || moznosti[(seed||0)%Math.min(3,moznosti.length)];
+    pridat[vybrane.x.k]=vybrane.kolik;
+  }
+  return Object.keys(pridat).length?pridat:null;
 }
 function souhrnDne(jidla,id){
   const a={};jidla.forEach(m=>{const x=m.porce[id];if(x)for(const k in x)a[k]=(a[k]||0)+x[k]});
@@ -1143,7 +1234,7 @@ const MIRY={
   pohanka:[85,HRNECEK], nudle:[62,HNIZDO], nudlicky:[10,LZICE],
   maliny:[25,HRST],
   banan:[110,KS], jablko:[150,KS], hruska:[150,KS], pomeranc:[150,KS],
-  orechy:[20,HRST], mandle:[20,HRST], vlocky:[45,HRST],
+  orechy:[20,HRST], mandle:[20,HRST], tvaroh:[250,BALENI], skyr:[140,KELIMEK], mandle:[20,HRST], vlocky:[45,HRST],
   arasidove:[15,LZICE], med:[12,LZICE], tunak:[80,KONZERVA], eidam:[25,PLATEK],
   cizrna:[240,KONZERVA], fazole:[240,KONZERVA], tofu:[180,BALENI], cottage:[150,KELIMEK],
   tvaroh:[250,BALENI], skyr:[140,KELIMEK], kokos:[400,KONZERVA], sojovka:[15,LZICE],

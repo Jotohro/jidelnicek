@@ -85,8 +85,24 @@ v rovnováze.
 | Sacharidy | od 173 g | od 139 g | minimum pro mozek a zásoby glykogenu |
 
 Podkročení se trestá zhruba čtyřikrát přísněji než překročení — nedostatek
-poškozuje, přebytek jen rozhodí poměry. Appka pásma hlídá na dvou
-místech: při výběru jídel a při dolaďování gramáží.
+poškozuje, přebytek jen rozhodí poměry. Appka pásma hlídá na třech
+místech: při výběru jídel, při dolaďování gramáží a nakonec **dorovnáním**.
+
+**Dorovnání** je poslední pojistka. Když den ani po doladění nedosáhne na
+spodní hranici, přidá se k němu malá věc navíc — hrst ořechů na tuky,
+tvaroh nebo tuňák na bílkoviny, špenát, fazolky nebo maliny na vlákninu.
+V jídelníčku se ukáže jako vlastní řádek *Dorovnání* a do nákupního
+seznamu se započítá.
+
+Spustí se, až když schodek přesáhne tři procenta, zastaví se na dvou
+položkách a nikdy nepřelezne 112 % kalorií.
+
+**Dorovnání je záchranná brzda, ne řešení.** Při výběru jídel se počítá
+jako mínus, takže automat dá přednost dni, který se bez něj obejde —
+jinak by klidně naplánoval rohlík s marmeládou a spolehl se, že to
+zachrání hrst ořechů. V automaticky složeném týdnu je proto potřeba jen
+zhruba u jednoho procenta dnů. Naplno se uplatní, až když si nějaké
+jídlo vybereš ručně.
 
 
 V sekci **Jídelníček** je nahoře přehled průměrů za týden — u každé
@@ -197,9 +213,15 @@ plátků šunky ani tři pomeranče na svačinu.
 Zbylá procenta jsou dny, kdy se to sejde tak, že to jinak nejde —
 v přehledu se obarví červeně, ať je vidíš.
 
-Aby to nebylo každý týden stejné, mezi stejně dobrými variantami si
-občas hodí korunou, hlavní jídlo se neopakuje ve dvou várkách po sobě
-a stejná snídaně nepřijde dva dny za sebou.
+Dvě pravidla platí natvrdo, i kdyby to znamenalo horší čísla:
+
+- **hlavní jídlo se v týdnu neopakuje** — každá ze čtyř várek je jiná
+- **snídaně, svačiny ani druhá večeře nepřijdou dva dny po sobě** stejné;
+  obden ano, hned zítra ne
+
+Mezi stejně dobrými variantami si appka občas hodí korunou, ať týdny
+nevypadají pořád stejně. Ověřeno na 30 náhodných týdnech: nula opakování
+v obou kategoriích.
 
 ## Nabídka jídel
 
