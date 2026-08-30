@@ -717,8 +717,20 @@ function planTydne(iso){
   const db=DB.read();
   if(!db.plany[iso])db.plany[iso]=prazdnyPlan();
   const p=db.plany[iso];
-  if(!p.dny)Object.assign(p,prazdnyPlan());
-  if(!p.polevky)p.polevky=[null,null,null,null];
+  /* Plán může přijít z jiné verze nebo poškozený — dorovnat na správný tvar,
+     ať appka nespadne na chybějícím dni. */
+  if(!Array.isArray(p.dny)||p.dny.length!==DAYS.length)
+    p.dny=DAYS.map((_,i)=>Object.assign({snidane:null,svacina:null,odpol:null,druha:null},
+      (Array.isArray(p.dny)&&p.dny[i])||{}));
+  else p.dny=p.dny.map(d=>Object.assign({snidane:null,svacina:null,odpol:null,druha:null},d||{}));
+  if(!Array.isArray(p.hrnce)||p.hrnce.length!==PAIRS.length)
+    p.hrnce=PAIRS.map((_,i)=>(Array.isArray(p.hrnce)&&p.hrnce[i])||null);
+  if(!Array.isArray(p.polevky)||p.polevky.length!==PAIRS.length)
+    p.polevky=PAIRS.map((_,i)=>(Array.isArray(p.polevky)&&p.polevky[i])||null);
+  /* jídlo, které mezitím z nabídky zmizelo, nahradíme prázdnem */
+  p.hrnce=p.hrnce.map(id=>id&&recById(id)?id:null);
+  p.polevky=p.polevky.map(id=>id&&recById(id)?id:null);
+  p.dny.forEach(d=>VOLNE.forEach(sl=>{if(d[sl]&&!recById(d[sl]))d[sl]=null}));
   return p;
 }
 /* Kolik ten den chybí do zdravého dne. Nula je ideál.
@@ -883,6 +895,18 @@ function doplnPlan(iso,odznova){
 }
 
 /* Jídelníček se drží připravený na měsíc dopředu. */
+/* Plány z verzí, kde týden začínal pondělkem, mají jinou stavbu dvojic —
+   nedají se přepočítat, tak je zahodíme a naplánují se znovu. */
+function uklidStarePlany(){
+  const db=DB.read();let smazano=0;
+  Object.keys(db.plany||{}).forEach(iso=>{
+    const d=new Date(iso+"T12:00");
+    if(d.getDay()!==0){delete db.plany[iso];smazano++}
+  });
+  if(smazano)DB.save();
+  return smazano;
+}
+
 function pripravMesic(odIso){
   const zaklad=odIso||pondeli(dnes());
   for(let t=0;t<5;t++){
@@ -1898,8 +1922,10 @@ function ctiHash(){
   const h=(location.hash||"").replace(/^#/,"");
   if(!h)return null;
   const [v,t]=h.split("/");
+  /* Starší verze začínaly týden pondělkem. Cokoliv, co není neděle,
+     srovnáme na neděli toho týdne — jinak by se dny posunuly o den. */
   return{pohled:POHLEDY.includes(v)?v:"home",
-         tyden:/^\d{4}-\d{2}-\d{2}$/.test(t||"")?t:null};
+         tyden:/^\d{4}-\d{2}-\d{2}$/.test(t||"")?pondeli(t):null};
 }
 function jdi(kam,bezHashe){
   POHLED=POHLEDY.includes(kam)?kam:"home";
@@ -1959,6 +1985,7 @@ function startNastaveni(){
   document.getElementById("ghToken").value=c.token||"";
 }
 startNastaveni();
+uklidStarePlany();
 pripravMesic(TYDEN);
 prekresli();
 { const z=ctiHash(); jdi(z?z.pohled:"home"); }
