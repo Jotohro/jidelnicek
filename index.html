@@ -466,6 +466,23 @@ const ING={
  paprikamleta:{n:"Mletá paprika",k:282,p:14,c:54,f:13,vl:35,cat:"spiz",lock:true},
  skorice:{n:"Skořice",k:247,p:4,c:27,f:1.2,vl:53,cat:"spiz",lock:true}
 };
+/* Kolik se dá rozumně sníst v jednom jídle. Bez toho škálování dojede
+   k deseti plátkům šunky nebo pěti vejcím na snídani. */
+const STROP={
+  sunka:72, platkovy:50, zeletava:50, vejce:220, chleb:100, toast:100, knacke:60,
+  rohlik:126, pomaz:50, smetanito:20, maslo:15, olej:15, marmelada:40,
+  mleko:500, protein:40, puding:400, reckyjog:280, mozzarella:125, hermelin:100,
+  balkan:100, tvaroh:250, skyr:280, cottage:200, eidam:60, smetana:60,
+  orechy:40, mandle:40, arasidove:30, riomare:320, tunak:160,
+  kure:250, kruta:250, hovezi:200, hovezizadni:250, veprove:270, panenka:250,
+  kachna:250, losos:220, treska:220,
+  ryze:120, testoviny:120, kuskus:120, pohanka:130, nudle:120, nudlicky:30,
+  brambory:450, bataty:400, knedlik:200, bramknedlik:200, noky:250,
+  strouhanka:40, mouka:25, banan:220, jablko:300, hruska:300, pomeranc:300,
+  maliny:150, vlocky:100
+};
+function stropPorce(k,g){const m=STROP[k];return m?Math.min(g,m):g}
+
 const REC=[
  {id:"s1",slot:"snidane",n:"Vejce, chleba, šunka",i:[["vejce",165],["chleb",100],["sunka",48],["maslo",10]]},
  {id:"s2",slot:"snidane",n:"Toast se šunkou a sýrem",i:[["toast",100],["sunka",48],["platkovy",50],["okurka",80],["smetanito",10]]},
@@ -534,6 +551,19 @@ const DAYSHORT=["Po","Út","St","Čt","Pá","So","Ne"];
 const PAIRS=[[0,1],[2,3],[4],[5,6]];
 /* podíly dne u toho, kdo jí celý den */
 const SHARES={snidane:0.20,svacina:0.08,obed:0.27,odpol:0.08,vecere:0.27,druha:0.10};
+/* Rozložení dne se dá u každého přepnout — kdo ráno nejí, nemá důvod
+   dostávat pětinu dne ke snídani. */
+const ROZLOZENI={
+  standard:{nazev:"Rovnoměrně",       podily:Object.assign({polevka:0.08},SHARES)},
+  malaSnidane:{nazev:"Malá snídaně",  podily:{snidane:0.12,svacina:0.08,obed:0.30,odpol:0.08,vecere:0.30,druha:0.12,polevka:0.08}},
+  bezSvacin:{nazev:"Bez svačin",      podily:{snidane:0.22,svacina:0,   obed:0.32,odpol:0,   vecere:0.32,druha:0.14,polevka:0.08}},
+  tezisteVecer:{nazev:"Těžiště večer",podily:{snidane:0.14,svacina:0.08,obed:0.26,odpol:0.10,vecere:0.30,druha:0.12,polevka:0.08}}
+};
+function rozlozeniOsoby(o){
+  const r=(DB.read().rozlozeni||{})[o.id];
+  return ROZLOZENI[r]?r:"standard";
+}
+function podil(o,slot){return ROZLOZENI[rozlozeniOsoby(o)].podily[slot]||0}
 const JOZA_PODIL=0.80;        /* Jožův den = 80 % Pepčova, plánuje se z něj jen oběd */
 const REFERENCNI="pepca";     /* podle koho se ta porce měří */
 const POLEVKA_PODIL=0.08;   /* polévka k obědu */
@@ -587,9 +617,9 @@ function scaleRec(rec,f,bezBaleni){
   const a={};
   rec.i.forEach(([k,g])=>{
     const x=ING[k];
-    if(bezBaleni){a[k]=Math.max(5,Math.round(g*f/5)*5);return}
-    if(x.lock){a[k]=Math.max(3,Math.round(g*f));return}   /* koření a tuky škálují, jen s nimi pak nikdo nehýbe */
-    a[k]=roundAmt(k,g*f);
+    if(bezBaleni){a[k]=stropPorce(k,Math.max(5,Math.round(g*f/5)*5));return}
+    if(x.lock){a[k]=stropPorce(k,Math.max(3,Math.round(g*f)));return}   /* koření a tuky škálují, jen s nimi pak nikdo nehýbe */
+    a[k]=stropPorce(k,roundAmt(k,g*f));
   });
   return a;
 }
@@ -957,9 +987,9 @@ function pripravMesic(odIso){
 
 function dolad(volna,zbyva,tg){
   /* 1. fáze — rozpustit zbývající kalorie mezi volná jídla podle jejich podílu */
-  const sumaPodilu=volna.reduce((x,m)=>x+SHARES[m.slot],0)||1;
+  const sumaPodilu=volna.reduce((x,m)=>x+(tg.podily[m.slot]||0),0)||1;
   volna.forEach(m=>{
-    const cil=zbyva*SHARES[m.slot]/sumaPodilu;
+    const cil=zbyva*(tg.podily[m.slot]||0)/sumaPodilu;
     
     const zaklad=macros(scaleRec(m.rec,1)).k;
     if(zaklad<=0)return;
@@ -979,6 +1009,7 @@ function dolad(volna,zbyva,tg){
       const hust=x.p/Math.max(x.k,1);if(hust<0.09)return;
       const krok=x.step||10, base=basev(m.rec,key), next=m.a[key]+(chybi>0?krok:-krok);
       if(next<Math.max(x.step||5,base*0.55)||next>base*1.7)return;
+      if(next>stropPorce(key,next))return;      /* deset plátků šunky nikdo nesní */
       if(!zdroj||hust>zdroj.hust)zdroj={m,key,next,hust,delta:(next-m.a[key])*x.k/100};
     }));
     if(!zdroj)break;
@@ -993,6 +1024,7 @@ function dolad(volna,zbyva,tg){
         const krok=x.step||10, base=(m.z&&m.z[key])||basev(m.rec,key), puvodni=basev(m.rec,key), next=m.a[key]+(zbytek>0?-krok:krok);
         if(next<Math.max(x.step||5,base*0.6)||next>base*1.6)return;
         if(next>puvodni*1.9||next<puvodni*0.4)return;
+        if(next>stropPorce(key,next))return;
         if(!cil||hust>cil.hust)cil={m,key,next,hust,delta:(next-m.a[key])*x.k/100};
       }));
       if(!cil)break;
@@ -1011,7 +1043,7 @@ function dolad(volna,zbyva,tg){
       const x=ING[key];if(x.lock)return;
       const hust=x.f/Math.max(x.k,1);if(hust<0.05)return;
       const krok=x.step||5, base=(m.z&&m.z[key])||basev(m.rec,key), next=m.a[key]+krok;
-      if(next>base*1.6||next>basev(m.rec,key)*1.9)return;
+      if(next>base*1.6||next>basev(m.rec,key)*1.9||next>stropPorce(key,next))return;
       if(!zdroj||hust>zdroj.hust)zdroj={m,key,next,hust,delta:(next-m.a[key])*x.k/100};
     }));
     if(!zdroj)break;
@@ -1060,6 +1092,7 @@ function dolad(volna,zbyva,tg){
       const base=(m.z&&m.z[key])||basev(m.rec,key), puvodni=basev(m.rec,key), next=m.a[key]+(rozdil>0?krok:-krok);
       if(next<Math.max(x.step||5,base*0.55)||next>base*1.7)return;
       if(next>puvodni*1.9||next<puvodni*0.4)return;
+      if(next>stropPorce(key,next))return;
       if(!cil||hust>cil.hust)cil={m,key,next,hust};
     }));
     if(!cil)break;
@@ -1069,20 +1102,21 @@ function dolad(volna,zbyva,tg){
 
 /* ---- porcování a stavba jednoho dne (používá to i automatický výběr) ---- */
 function cilePro(){const tg={};LIDE.forEach(o=>tg[o.id]=cile(o));return tg}
-function cilPorce(o,podil,tg){
-  return o.cely ? tg[o.id].kcal*podil
-                : JOZA_PODIL*tg[REFERENCNI].kcal*podil;   /* kdo nejí celý den, měří se podle Pepči */
+function cilPorce(o,slot,tg){
+  /* kdo nejí celý den, měří se podle Pepči */
+  return o.cely ? tg[o.id].kcal*podil(o,slot)
+                : JOZA_PODIL*tg[REFERENCNI].kcal*podil(osoba(REFERENCNI),slot);
 }
-function porcuj(rec,podil,tg){
+function porcuj(rec,slot,tg){
   const zaklad=macros(scaleRec(rec,1)).k;
   const porce={};
-  LIDE.forEach(o=>{porce[o.id]=scaleRec(rec,Math.min(1.8,Math.max(0.3,cilPorce(o,podil,tg)/zaklad)),true)});
+  LIDE.forEach(o=>{porce[o.id]=scaleRec(rec,Math.min(1.8,Math.max(0.3,cilPorce(o,slot,tg)/zaklad)),true)});
   return{rec,porce};
 }
 function hrnceZPlanu(p,tg){
   return{
-    hrnce:PAIRS.map((_,i)=>{const r=p.hrnce[i]?recById(p.hrnce[i]):null;return r?porcuj(r,SHARES.obed,tg):null}),
-    polevky:PAIRS.map((_,i)=>{const r=(jeVikend(i)&&p.polevky[i])?recById(p.polevky[i]):null;return r?porcuj(r,POLEVKA_PODIL,tg):null})
+    hrnce:PAIRS.map((_,i)=>{const r=p.hrnce[i]?recById(p.hrnce[i]):null;return r?porcuj(r,"obed",tg):null}),
+    polevky:PAIRS.map((_,i)=>{const r=(jeVikend(i)&&p.polevky[i])?recById(p.polevky[i]):null;return r?porcuj(r,"polevka",tg):null})
   };
 }
 function sestavDen(d,p,hrnce,polevky,tg){
@@ -1107,10 +1141,10 @@ function sestavDen(d,p,hrnce,polevky,tg){
       const rec=recById(id);if(!rec)return;
       const zaklad=macros(scaleRec(rec,1)).k;
       const porce={};
-      LIDE.filter(o=>o.cely).forEach(o=>{
-        porce[o.id]=scaleRec(rec,Math.min(1.7,Math.max(0.5,tg[o.id].kcal*SHARES[slot]/zaklad)));
+      LIDE.filter(o=>o.cely&&podil(o,slot)>0).forEach(o=>{
+        porce[o.id]=scaleRec(rec,Math.min(1.7,Math.max(0.5,tg[o.id].kcal*podil(o,slot)/zaklad)));
       });
-      jidla.push({slot,rec,porce});
+      if(Object.keys(porce).length)jidla.push({slot,rec,porce});
     }
   });
   /* doladit každému zvlášť — uvařené jídlo zůstává, hýbou se jen volná jídla */
@@ -1122,7 +1156,8 @@ function sestavDen(d,p,hrnce,polevky,tg){
     let kHrnci={k:0,p:0,f:0};
     moje.filter(m=>m.hrnec!==undefined).forEach(m=>{const x=macros(m.porce[o.id]);kHrnci.k+=x.k;kHrnci.p+=x.p;kHrnci.f+=x.f});
     dolad(volna,Math.max(300,tg[o.id].kcal-kHrnci.k),
-          Object.assign({},tg[o.id],{pHrnec:kHrnci.p,fHrnec:kHrnci.f}));
+          Object.assign({},tg[o.id],{pHrnec:kHrnci.p,fHrnec:kHrnci.f,
+                                     podily:ROZLOZENI[rozlozeniOsoby(o)].podily}));
     const dpl=dorovnani(souhrnDne(jidla,o.id),tg[o.id],d+(o.id==="simca"?1:0));
     if(dpl)dorovnat[o.id]=dpl;
   });
@@ -1298,6 +1333,11 @@ function renderPeople(){
       :`<div class="krokinfo">${cz(krokyOsoby(o))} kroků denně · naposledy ${dmt(krokZaznam(o).od)}</div>`}
       ${o.cely?`<div class="wrow">
         <input id="kcal-${o.id}" type="number" step="10" inputmode="numeric" value="${rezimPrijmu(o)==="rucne"?(vlastniKcal(o)||t.kcal):t.kcal}" ${rezimPrijmu(o)==="rucne"?"":"disabled"} aria-label="Denní příjem ${o.jmeno}">
+        <select class="rezim-select" data-rozlozeni="${o.id}">
+          ${Object.keys(ROZLOZENI).map(k=>`<option value="${k}"${rozlozeniOsoby(o)===k?" selected":""}>${ROZLOZENI[k].nazev}</option>`).join("")}
+        </select>
+      </div>
+      <div class="wrow">
         <select class="rezim-select" data-rezim="${o.id}">
           <option value="zaklad"${rezimPrijmu(o)==="zaklad"?" selected":""}>ze základu</option>
           <option value="kroky"${rezimPrijmu(o)==="kroky"?" selected":""}>podle kroků</option>
@@ -1321,6 +1361,12 @@ function renderPeople(){
     const id=b.dataset.krokok;
     ulozKroky(id,krokyOsoby(osoba(id)));
     prekresli();setStatus(osoba(id).jmeno+": necháváme, zeptám se za dva týdny.");
+  });
+  document.querySelectorAll("[data-rozlozeni]").forEach(sel=>sel.onchange=()=>{
+    const id=sel.dataset.rozlozeni, db=DB.read();
+    db.rozlozeni=db.rozlozeni||{};db.rozlozeni[id]=sel.value;
+    DB.save();oznacZmenu("nastaveni","rozlozeni");prekresli();
+    setStatus(osoba(id).jmeno+": rozložení dne — "+ROZLOZENI[sel.value].nazev+".");
   });
   document.querySelectorAll("[data-rezim]").forEach(sel=>sel.onchange=()=>{
     const id=sel.dataset.rezim, db=DB.read();
@@ -1925,7 +1971,7 @@ function chybaText(st){
 function ghChyba(st){const e=new Error(chybaText(st));e.status=st;return e}
 /* Co patří do sdílených dat. Kdyby přibyla další nastavení, přidej je sem —
    jinak se budou lišit telefon od telefonu. */
-const SDILENA_NASTAVENI=["kg","kroky","rezim","kcalRucne","rucne","vypnute"];
+const SDILENA_NASTAVENI=["kg","kroky","rezim","rozlozeni","kcalRucne","rucne","vypnute"];
 /* Tohle zůstává v telefonu: token, stav odesílání a drobnosti zobrazení. */
 const MISTNI_KLICE=["gh","dirty","syncCas","skrytKoupene","snooze","role"];
 

@@ -335,6 +335,24 @@ Míry jdou doladit — jsou v souboru `index.html` v tabulce `MIRY`, kde
 je u každé suroviny gramáž jednoho dílu. Když u vás plátek šunky váží
 15 g místo 12, přepíšeš jedno číslo.
 
+**Každá surovina má strop na jednu porci** — tabulka `STROP` v témže
+souboru. Šest plátků šunky, čtyři vejce, dva krajíce chleba. Bez toho
+škálování podle kalorií dojede k nesmyslům; jednou vyšlo deset plátků
+šunky ke snídani.
+
+## Rozložení dne
+
+V kartě u každého je přepínač, jak se má den rozdělit mezi chody:
+
+| | snídaně | oběd | večeře | ostatní |
+|---|---|---|---|---|
+| Rovnoměrně | 20 % | 27 % | 27 % | svačiny a druhá večeře |
+| Malá snídaně | 12 % | 30 % | 30 % | pro toho, kdo ráno nejí |
+| Bez svačin | 22 % | 32 % | 32 % | svačiny se vůbec nezobrazí |
+| Těžiště večer | 14 % | 26 % | 30 % | víc na odpoledne a večer |
+
+Nastavuje se to každému zvlášť a sdílí se mezi telefony.
+
 ## Přesnost
 
 Pepča vychází zhruba na cíl. **Simča je ve všední dny blízko** (kolem
