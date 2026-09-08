@@ -735,6 +735,7 @@ function zamky(p){
   return p.zamky;
 }
 function zamkni(p,co){
+  p.auto=false;                       /* od téhle chvíle je plán ručně upravený */
   const z=zamky(p);
   if(co.typ==="hrnec")z.hrnce[co.i]=true;
   else if(co.typ==="polevka")z.polevky[co.i]=true;
@@ -978,11 +979,19 @@ function uklidStarePlany(){
 
 function pripravMesic(odIso){
   const zaklad=odIso||pondeli(dnes());
+  let vzniklo=0;
   for(let t=0;t<5;t++){
     const iso=posun(zaklad,t*7), p=planTydne(iso);
     const prazdny=p.hrnce.some(x=>!x)||p.dny.some(d=>VOLNE.some(s=>!d[s]));
-    if(prazdny)doplnPlan(iso,false);
+    if(!prazdny)continue;
+    doplnPlan(iso,false);
+    /* Označit jako automaticky složený a orazítkovat. Bez razítka měl každý
+       telefon vlastní plán a slučování je nemělo podle čeho porovnat. */
+    p.auto=true;p.t=p.t||Date.now();
+    vzniklo++;
   }
+  if(vzniklo){const db=DB.read();db.dirty=true;DB.save()}
+  return vzniklo;
 }
 
 function dolad(volna,zbyva,tg){
@@ -2031,7 +2040,13 @@ async function syncPull(potichu){
     /* plány: u každého týdne vyhrává novější zápis, ne poslední stažení */
     if(data.plany)Object.keys(data.plany).forEach(iso=>{
       const moje=db.plany[iso], jejich=data.plany[iso];
-      if(!moje||(jejich.t||0)>(moje.t||0))db.plany[iso]=jejich;
+      if(!moje){db.plany[iso]=jejich;return}
+      /* ručně upravený plán má přednost před automaticky složeným,
+         mezi dvěma stejnými rozhoduje čas */
+      const mojeRucni=moje.auto===false, jejichRucni=jejich.auto===false;
+      if(jejichRucni&&!mojeRucni){db.plany[iso]=jejich;return}
+      if(mojeRucni&&!jejichRucni)return;
+      if((jejich.t||0)>(moje.t||0))db.plany[iso]=jejich;
     });
     /* odškrtané položky: každá má vlastní čas, takže se nepřepisují navzájem */
     if(data.nakup){
@@ -2146,7 +2161,6 @@ function startNastaveni(){
 }
 startNastaveni();
 uklidStarePlany();
-pripravMesic(TYDEN);
 prekresli();
 { const z=ctiHash(); jdi(z?z.pohled:"home"); }
 
@@ -2161,7 +2175,13 @@ document.addEventListener("visibilitychange",()=>{if(!document.hidden){checkRemi
 window.addEventListener("online",()=>{setStav("jsme zpátky online");autoSync()});
 window.addEventListener("offline",stavPodleSite);
 stavPodleSite();
-autoSync();
+/* Nejdřív stáhnout, co už je hotové, a teprve pak dopočítat chybějící týdny —
+   jinak si každý telefon složí vlastní verzi a pak se přetahují. */
+(async()=>{
+  await autoSync();
+  if(pripravMesic(TYDEN)){prekresli();autoSync()}
+  else prekresli();
+})();
 
 /* ============ hlídání nové verze ============ */
 let MOJE_VERZE=null;

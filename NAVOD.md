@@ -318,6 +318,10 @@ pro případ, že chceš ručně.
 Offline appka funguje normálně — změny se ukládají do telefonu
 a odešlou se, jakmile bude signál.
 
+**Automaticky složený týden se sdílí taky.** Kdo appku spustí první, ten
+týden složí a ostatní si ho stáhnou — nesloží si vlastní. Ručně upravený
+plán má vždycky přednost před automatickým, i kdyby byl starší.
+
 **Když měníte oba naráz**, nepřepíšete se. Každé odškrtnutí i každý
 týdenní plán nese vlastní časovou značku a při slučování vyhrává ten
 novější zápis, položku po položce. Když jeden odškrtne chleba
