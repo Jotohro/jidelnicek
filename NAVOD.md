@@ -181,6 +181,13 @@ proužek se jmény. Váhy se zapisují v Úpravě jídelníčku.
 aktuální týden a čtyři následující; když přepneš na další, doplní ho taky.
 Trvá to zhruba půl vteřiny na pět týdnů.
 
+**Dozadu se nic nedomýšlí.** Minulé týdny zůstanou tak, jak byly
+naplánované — appka do nich nic nedogeneruje, protože historie se
+nevymýšlí. Když do některého skočíš a nikdy naplánovaný nebyl, napíše
+to. Dny, které už proběhly, jsou v týdnu zešedlé a mají štítek *už bylo*;
+v liště nahoře je u minulého týdne poznámka *minulý*, u budoucího
+*dopředu*.
+
 **Když jedno jídlo změníš, zbytek se dorovná.** Tvoje volba se zamkne
 (v editoru ji poznáš podle tečky u názvu chodu) a appka přeskládá
 ostatní jídla dotčených dnů tak, aby kalorie i živiny zase seděly.

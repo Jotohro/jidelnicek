@@ -159,6 +159,8 @@ button:focus-visible{outline:2px solid var(--beet);outline-offset:2px}
 .potnote{font-size:13px;color:var(--muted);margin-top:12px;border-left:3px solid var(--beet);padding-left:10px}
 /* týden */
 .day{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:20px;margin-bottom:16px}
+.day.bylo{opacity:.62}
+.day.bylo .day-head .tag{color:var(--muted)}
 .day-head{display:flex;align-items:baseline;gap:10px;margin-bottom:10px}
 .day-name{font-family:var(--display);font-weight:800;font-size:22px;letter-spacing:-.01em}
 .day-date{font-family:var(--mono);font-size:13px;color:var(--muted)}
@@ -977,11 +979,16 @@ function uklidStarePlany(){
   return presunuto;
 }
 
+const jeMinuly=iso=>iso<pondeli(dnes());
 function pripravMesic(odIso){
+  /* Dopředu se plánuje na měsíc, dozadu se nic nedomýšlí — co nebylo
+     naplánované, to prostě nebylo. */
   const zaklad=odIso||pondeli(dnes());
   let vzniklo=0;
   for(let t=0;t<5;t++){
-    const iso=posun(zaklad,t*7), p=planTydne(iso);
+    const iso=posun(zaklad,t*7);
+    if(jeMinuly(iso))continue;
+    const p=planTydne(iso);
     const prazdny=p.hrnce.some(x=>!x)||p.dny.some(d=>VOLNE.some(s=>!d[s]));
     if(!prazdny)continue;
     doplnPlan(iso,false);
@@ -1706,7 +1713,7 @@ function renderWeek(){
         <div class="slot"><span class="dot sl-${m.slot}"></span>${SLOTNAME[m.slot]}</div>
         <div class="mname">${m.rec.n}${m.hrnec!==undefined?'<span class="tag">na víc dnů</span>':""}</div>
         ${lidi}</div>`;
-    }).join("")||`<div class="hint">Prázdný den — doplň ho v sekci Skládání týdne.</div>`;
+    }).join("")||`<div class="hint">${jeMinuly(TYDEN)?"Tenhle den nebyl naplánovaný.":"Prázdný den — doplň ho v sekci Skládání týdne."}</div>`;
     const nums=LIDE.map(o=>{
       const s=VYPOCET.souhrn[o.id][d], t=VYPOCET.tg[o.id];
       if(!s.k)return "";
@@ -1716,8 +1723,9 @@ function renderWeek(){
              zn(s.p,t.pMin,t.pMax,"g bílk")+" · "+zn(s.f,t.fMin,t.fMax,"g tuk")+" · "+
              zn(s.vl,t.vlMin,t.vlMax,"g vlák")+`</div>`;
     }).filter(Boolean).join("");
-    return `<div class="day">
-      <div class="day-head"><span class="day-name">${den.nazev}</span><span class="day-date">${dmt(den.datum)}</span></div>
+    const bylo=den.datum<dnes();
+    return `<div class="day${bylo?" bylo":""}">
+      <div class="day-head"><span class="day-name">${den.nazev}</span><span class="day-date">${dmt(den.datum)}</span>${bylo?'<span class="tag">už bylo</span>':""}</div>
       <div class="day-nums">${nums}</div>
       <div class="meals">${jidla}</div></div>`;
   }).join("");
@@ -1911,7 +1919,8 @@ function checkReminder(){
 function prekresli(){
   VYPOCET=spocitej(TYDEN);
   document.getElementById("wlabel").textContent=cisloTydne(TYDEN)+". týden";
-  document.getElementById("wrange").textContent="("+dmt(TYDEN)+" – "+dmt(posun(TYDEN,6))+")";
+  document.getElementById("wrange").textContent="("+dmt(TYDEN)+" – "+dmt(posun(TYDEN,6))+")"
+    +(jeMinuly(TYDEN)?" · minulý":(TYDEN>pondeli(dnes())?" · dopředu":""));
   renderPeople();
   renderEditor();renderNabidka();
   renderWeek();renderPrumery();renderCook();renderShop();renderDnes();checkReminder();stavPodleSite();
